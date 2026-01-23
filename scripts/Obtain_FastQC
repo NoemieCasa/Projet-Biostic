@@ -1,0 +1,27 @@
+#!/bin/bash
+#SBATCH -J STEP0
+#SBATCH --cluster=nautilus
+#SBATCH --qos=short
+#SBATCH --ntasks=8
+#SBATCH --mem-per-cpu=10g
+#SBATCH --time=10:00:00
+
+# Commandes pour Obtain FastQC
+
+# Définition du dossier de travail
+projPath = $HOME/scratch/FastQC-data
+
+# Création du dossier tools s'il n'existe pas 
+mkdir -p ${projPath}/tools
+cd ${projPath}/tools
+
+# Récupération des données
+wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.9.zip
+
+# On unzip le fichier téléchargé
+unzip fastqc_v0.11.9.zip
+
+# Autorisation pour l'execution 
+chmod +x FastQC/fastqc
+
+
