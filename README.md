@@ -1,7 +1,6 @@
 # FastQC
 
-This repository contains scripts to download, installand execute FastQC locally
-on the Nautilus cluster.
+Ce repository contient les scripts pour télécharger, installer et executer les scripts nécéssaires au FastQC.
 
 ## Etape 1 – Installer FastQC
 
