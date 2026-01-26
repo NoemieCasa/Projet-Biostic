@@ -9,19 +9,11 @@
 # Commandes pour Obtain FastQC
 
 # Définition du dossier de travail
-projPath = $HOME/scratch/FastQC-data
+projPath=$HOME/scratch/FastQC-data
+SAMPLE="5-HV1GZMBi_S1_L001_R1_001"
 
-# Création du dossier tools s'il n'existe pas 
-mkdir -p ${projPath}/tools
-cd ${projPath}/tools
+# Création du dossier de sortie
+mkdir -p $projPath/fastqFileQC/$SAMPLE
 
-# Récupération des données
-wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.9.zip
-
-# On unzip le fichier téléchargé
-unzip fastqc_v0.11.9.zip
-
-# Autorisation pour l'execution 
-chmod +x FastQC/fastqc
 
 
