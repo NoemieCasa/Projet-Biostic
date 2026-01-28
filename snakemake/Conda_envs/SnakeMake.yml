@@ -1,0 +1,12 @@
+name: Snakemake
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - pandas
+  - snakemake-minimal=8.11.3
+  - snakemake-executor-plugin-slurm=0.5.0
+  
+ 
+

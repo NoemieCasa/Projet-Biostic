@@ -1,0 +1,8 @@
+name: Bigwigmerge
+channels:
+  - bioconda
+  - defaults
+dependencies:
+  - ucsc-bedgraphtobigwig=366
+  - ucsc-bigwigmerge=366
+

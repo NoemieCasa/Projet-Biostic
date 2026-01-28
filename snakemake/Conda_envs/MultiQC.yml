@@ -1,0 +1,11 @@
+name: multiQC
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - matplotlib=3.9.1
+  - pip=24.0
+  - pip:
+    - multiqc==1.23
+

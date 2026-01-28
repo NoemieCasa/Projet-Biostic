@@ -1,0 +1,116 @@
+###########################
+###Load file and Samples###
+###########################
+shell.prefix("set -o pipefail; ")
+shell.executable("/bin/bash")
+shell.prefix("source /home/mmorin@ec-nantes.fr/.bashrc; ")
+configfile: "config.json"
+Snakedir = config["snakedir"]
+Workdir = config["workdir"]
+Rawdir = config["rawdir"]
+FastaFileDir = config["fastafiledir"]
+Metascape = config["pathtometascape"]
+scdir = config["scRNAseqDir"]
+
+#########################
+###Set other variables###
+#########################
+Conda_Dir = f"{Snakedir}/Conda_envs"
+	
+##################
+###Load Modules###
+##################
+import pandas as pd
+
+#####################
+###Load functions ###
+#####################
+## Creation des wildcards pour raw data pour totRNA
+SAMPLES = list(config["samples"].keys())
+RAW_SAMPLES=[]
+for sample in SAMPLES:
+    RAW_SAMPLES.append(config["samples"][str(sample)])
+
+## Fonction pour passer des wildcards raw au id imokit 
+def inputfiles(wildcards):
+    raw_sample = config["samples"][wildcards.sample]
+    raw_dir = Rawdir
+    return f"{raw_dir}/{raw_sample}_R1_001.fastq.gz", f"{raw_dir}/{raw_sample}_R2_001.fastq.gz"
+
+## creation de la liste des fichiers raw pour multiQC
+FilesForMultiQC = []
+for sample in SAMPLES :
+	Raw_Sample = config["samples"][str(sample)]
+	FilesForMultiQC.append([f"{Workdir}/FastQC/raw_data/{Raw_Sample}_R1_001_fastqc.zip",
+		f"{Workdir}/FastQC/raw_data/{Raw_Sample}_R2_001_fastqc.zip",
+		f"{Workdir}/logs/trimmomatic/err_trimmomatic_{sample}.txt"])
+
+## Generate Bigwig for each group
+## A ameliorer
+CovarTable = pd.read_table(f"{Snakedir}/utils/Covar.txt")
+TreatmentSamples = CovarTable.loc[CovarTable['Treatment'] == "rej"]['SampleID'].tolist()
+ControlSamples = CovarTable.loc[CovarTable['Treatment'] == "norej"]['SampleID'].tolist()
+RefSamples = CovarTable.loc[CovarTable['Treatment'] == "ref"]['SampleID'].tolist()
+excluded_samples = pd.read_table(f"{Snakedir}/utils/Sample_exclus_totRNA.allSamples.txt", header=None)
+for x in excluded_samples[0].tolist():
+	if x in TreatmentSamples:
+		TreatmentSamples.remove(x)
+	elif x in ControlSamples:
+		ControlSamples.remove(x)
+	elif x in RefSamples:
+		RefSamples.remove(x)
+TreatmentFiles_B = []
+ControlFiles_B = []
+RefFiles_B =[]
+for x in SAMPLES :
+	if x in TreatmentSamples :
+		TreatmentFiles_B.append(f"{Workdir}/bigwig/star/{x}.star.filter.bigwig")
+	elif x in ControlSamples :
+		ControlFiles_B.append(f"{Workdir}/bigwig/star/{x}.star.filter.bigwig")
+	elif x in RefSamples :
+		RefFiles_B.append(f"{Workdir}/bigwig/star/{x}.star.filter.bigwig")
+
+## Fasta files input for index
+FastaFiles=[]
+for chr in list(config["fastafiles"].keys()):
+	file = config["fastafiles"][str(chr)]
+	FastaFiles.append(f"{FastaFileDir}/{file}")  
+
+## Samples list for trinity
+def get_samples_left(wildcards):
+    return ','.join(expand(f"{Workdir}/trimmed_data/De_Novo_Assembly/{{sample}}_trimmed_1P.cor2.fq", sample=SAMPLES))
+def get_samples_right(wildcards):
+	return ','.join(expand(f"{Workdir}/trimmed_data/De_Novo_Assembly/{{sample}}_trimmed_2P.cor2.fq", sample=SAMPLES))
+
+## Samples trimmed for trinity
+def get_samples_left_t(wildcards):
+    return ','.join(expand(f"{Workdir}/De_Novo_Assembly/Trinity/trinity.all/{{sample}}_trimmed_1P.cor2.fq.PwU.qtrim.fq", sample=SAMPLES))
+def get_samples_right_t(wildcards):
+	return ','.join(expand(f"{Workdir}/De_Novo_Assembly/Trinity/trinity.all/{{sample}}_trimmed_2P.cor2.fq.PwU.qtrim.fq", sample=SAMPLES))
+
+
+
+##################
+###target rules###
+##################
+rule all:
+	input:
+		f"{Workdir}/multiQC/raw/multiqc_report.html",
+		f"{Workdir}/multiQC/star/multiqc_report.html",
+		f"{Workdir}/bigwig/Rejection.star.bigwig",
+		f"{Workdir}/bigwig/NoRejection.star.bigwig",
+		f"{Workdir}/bigwig/Reference.star.bigwig",
+		expand([f"{Workdir}/bigwig/star/{{sample}}.star.filter.bigwig"], sample=SAMPLES)
+		
+
+
+
+	
+##################
+###import rules###
+##################
+# Rules for preprocesses and QCs
+include: "Rules/Preprocess/totRNA_Preprocess.smk"
+include: "Rules/Preprocess/totRNA_Mapping.smk"
+include: "Rules/Preprocess/totRNA_QC.smk"
+

@@ -1,0 +1,7 @@
+name: Rcorrector
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - rcorrector=1.0.7

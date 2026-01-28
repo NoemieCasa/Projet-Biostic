@@ -1,0 +1,11 @@
+name: IMoKiT
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - snakemake-minimal=8.13.0
+  - snakemake-executor-plugin-slurm=0.6.0
+  - snakemake-wrapper-utils=0.6.2
+  - pandas=2.2.2
+  
