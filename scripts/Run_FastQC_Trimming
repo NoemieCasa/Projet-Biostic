@@ -1,0 +1,35 @@
+#!/bin/bash
+#SBATCH -J STEP0
+#SBATCH --cluster=nautilus
+#SBATCH --qos=short
+#SBATCH --ntasks=8
+#SBATCH --mem-per-cpu=10g
+#SBATCH --time=10:00:00
+
+# Initialisation de micromamba
+eval "$(micromamba shell hook -s bash)"
+
+# Activation de l'environnement fastqc  
+micromamba activate fastqc
+
+# Variables
+projPath="$HOME/scratch/fastqFileQC/"
+DATA="$HOME/scratch/fastqFileQC/results/Trimming"
+SAMPLE="5-HV1GZMBi_S1_L001"
+
+FASTQC_BIN="$HOME/micromamba/envs/fastqc/bin/fastqc"
+
+# Dossiers
+INPUT_DIR="$DATA"
+OUT_DIR="$projPath/results/${SAMPLE}_after_trimming"
+
+# Création du dossier de sortie
+mkdir -p "$OUT_DIR"
+
+# Vérification
+ls -ld "$OUT_DIR"
+
+# Exécution FastQC
+$FASTQC_BIN -o "$OUT_DIR" "$INPUT_DIR/${SAMPLE}_R1_001_paired.fastq.gz"
+$FASTQC_BIN -o "$OUT_DIR" "$INPUT_DIR/${SAMPLE}_R2_001_paired.fastq.gz"
+
