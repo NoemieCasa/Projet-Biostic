@@ -3,19 +3,18 @@
 # ============================================================
 rule obtain_fastqc:
     input:
-        r1 = lambda wc: f"{config['raw_data_dir']}/{wc.sample}_R1_001.fastq.gz",
-        r2 = lambda wc: f"{config['raw_data_dir']}/{wc.sample}_R2_001.fastq.gz"
+        r1 = lambda wc: f"{config['DataPath']}/{wc.sample}_R1_001.fastq.gz",
+        r2 = lambda wc: f"{config['DataPath']}/{wc.sample}_R2_001.fastq.gz"
     output:
-        r1_html = f"{WORKDIR}/results/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html",
-        r2_html = f"{WORKDIR}/results/fastqc_raw/{{sample}}/{{sample}}_R2_001_fastqc.html"
+        r1_html = f"{config['workdir']}/results/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html",
+        r2_html = f"{config['workdir']}/results/fastqc_raw/{{sample}}/{{sample}}_R2_001_fastqc.html"
     threads: config["fastqc_threads"]
-    conda:
-        "envs/fastqc.yml"
     shell:
         """
-        mkdir -p {WORKDIR}/results/fastqc_raw/{wildcards.sample}
-        fastqc -t {threads} -o {WORKDIR}/results/fastqc_raw/{wildcards.sample} {input.r1}
-        fastqc -t {threads} -o {WORKDIR}/results/fastqc_raw/{wildcards.sample} {input.r2}
+	micromamba activate fastqc
+        mkdir -p {config['workdir']}/results/fastqc_raw/{wildcards.sample}
+        fastqc -t {threads} -o {config['workdir']}/results/fastqc_raw/{wildcards.sample} {input.r1}
+        fastqc -t {threads} -o {config['workdir']}/results/fastqc_raw/{wildcards.sample} {input.r2}
         """
 
 # ============================================================
@@ -23,18 +22,18 @@ rule obtain_fastqc:
 # ============================================================
 rule trimming:
     input:
-        r1 = lambda wc: f"{config['raw_data_dir']}/{wc.sample}_R1_001.fastq.gz",
-        r2 = lambda wc: f"{config['raw_data_dir']}/{wc.sample}_R2_001.fastq.gz"
+        r1 = lambda wc: f"{config['DataPath']}/{wc.sample}_R1_001.fastq.gz",
+        r2 = lambda wc: f"{config['DataPath']}/{wc.sample}_R2_001.fastq.gz"
     output:
-        r1_paired = f"{WORKDIR}/results/Trimming/{{sample}}_R1_001_paired.fastq.gz",
-        r1_unpaired = f"{WORKDIR}/results/Trimming/{{sample}}_R1_001_unpaired.fastq.gz",
-        r2_paired = f"{WORKDIR}/results/Trimming/{{sample}}_R2_001_paired.fastq.gz",
-        r2_unpaired = f"{WORKDIR}/results/Trimming/{{sample}}_R2_001_unpaired.fastq.gz"
-    threads: config["trimmomatic_threads"]
+        r1_paired = f"{config['workdir']}/results/Trimming/{{sample}}_R1_001_paired.fastq.gz",
+        r1_unpaired = f"{config['workdir']}/results/Trimming/{{sample}}_R1_001_unpaired.fastq.gz",
+        r2_paired = f"{config['workdir']}/results/Trimming/{{sample}}_R2_001_paired.fastq.gz",
+        r2_unpaired = f"{config['workdir']}/results/Trimming/{{sample}}_R2_001_unpaired.fastq.gz"
+    threads: 1
     shell:
         """
 	micromamba activate trimmomatic
-        mkdir -p {WORKDIR}/results/Trimming
+        mkdir -p {config['workdir']}/results/Trimming
 
         trimmomatic PE \
         {input.r1} {input.r2} \
@@ -51,16 +50,23 @@ rule trimming:
 # ============================================================
 rule run_fastqc_trimmed:
     input:
-        r1 = f"{WORKDIR}/results/Trimming/{{sample}}_R1_001_paired.fastq.gz",
-        r2 = f"{WORKDIR}/results/Trimming/{{sample}}_R2_001_paired.fastq.gz"
+        r1 = f"{config['workdir']}/results/Trimming/{{sample}}_R1_001_paired.fastq.gz",
+        r2 = f"{config['workdir']}/results/Trimming/{{sample}}_R2_001_paired.fastq.gz"
     output:
-        r1_html = f"{WORKDIR}/results/fastqc_trimmed/{{sample}}/{{sample}}_R1_001_paired_fastqc.html",
-        r2_html = f"{WORKDIR}/results/fastqc_trimmed/{{sample}}/{{sample}}_R2_001_paired_fastqc.html"
+        r1_html = f"{config['workdir']}/results/fastqc_trimmed/{{sample}}/{{sample}}_R1_001_paired_fastqc.html",
+        r2_html = f"{config['workdir']}/results/fastqc_trimmed/{{sample}}/{{sample}}_R2_001_paired_fastqc.html"
     threads: config["fastqc_threads"]
     shell:
         """
 	micromamba activate fastqc
-        mkdir -p {WORKDIR}/results/fastqc_trimmed/{wildcards.sample}
-        fastqc -t {threads} -o {WORKDIR}/results/fastqc_trimmed/{wildcards.sample} {input.r1}
-        fastqc -t {threads} -o {WORKDIR}/results/fastqc_trimmed/{wildcards.sample} {input.r2}
+        mkdir -p {config['workdir']}/results/fastqc_trimmed/{wildcards.sample}
+        fastqc -t {threads} -o {config['workdir']}/results/fastqc_trimmed/{wildcards.sample} {input.r1}
+        fastqc -t {threads} -o {config['workdir']}/results/fastqc_trimmed/{wildcards.sample} {input.r2}
         """
+
+# ============================================================
+# Alignement avec Star
+# ============================================================
+rule alignement:
+	input:
+
