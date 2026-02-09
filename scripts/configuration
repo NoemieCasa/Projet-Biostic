@@ -1,0 +1,30 @@
+#!/bin/bash
+# --- EN-TÊTES SLURM (Configuration du Job) ---
+#SBATCH -J STEP2            # Nom du job (s'affichera dans la file d'attente avec squeue)
+#SBATCH --cluster=nautilus  # Nom du cluster sur lequel lancer le calcul
+#SBATCH --qos=short         # Qualité de service (ici 'short' pour des jobs courts/prioritaires)
+#SBATCH --ntasks=8          # Nombre de cœurs CPU demandés (8 processeurs)
+#SBATCH --mem-per-cpu=8g   # Mémoire vive (RAM) par cœur (Total = 8 * 10g = 80Go)
+#SBATCH --time=10:00:00     # Temps limite alloué (10 heures max, sinon le job est tué)
+#SBATCH --output=$HOME/scratch/fastqFileQC/results/logs/%x_%j.out
+#SBATCH --error=$HOME/scratch/fastqFileQC/results/logs/%x_%j.err
+#penser à se placer dans l'environnement STAR avant de lancer le script
+
+
+# ==============================================================================
+# ÉTAPE 1 : GÉNÉRATION DE L'INDEX
+# ==============================================================================
+# Cette étape convertit le génome FASTA en une structure binaire lisible par STAR.
+# ATTENTION : À ne lancer qu'une seule fois ! 
+cores=8
+
+export PATH="$HOME/micromamba/envs/STAR/bin:$PATH"
+
+STAR \
+  --runThreadN ${cores} \
+  --runMode genomeGenerate \
+  --genomeDir "/home/ncasamitja2024@ec-nantes.fr/scratch/fastqFileQC/genome_index/star" \
+  --genomeFastaFiles /LAB-DATA/GLiCID/projects/CR2TI_lab/TEAM3/Databases/FASTA/Hg38/chr*.fa
+  --sjdbGTFfile /LAB-DATA/GLiCID/projects/CR2TI_lab/TEAM3/Databases/GTF/Hg38.gtf
+  --sjdbOverhang 50 \
+  > /home/ncasamitja2024@ec-nantes.fr/scratch/fastqFileQC/results/logs/STAR_genomeGenerate.out 2>&1
