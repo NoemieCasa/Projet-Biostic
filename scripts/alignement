@@ -1,0 +1,56 @@
+#!/bin/bash
+# --- EN-TÊTES SLURM (Configuration du Job) ---
+#SBATCH -J STEP3            # Nom du job (s'affichera dans la file d'attente avec squeue)
+#SBATCH --cluster=nautilus  # Nom du cluster sur lequel lancer le calcul
+#SBATCH --qos=short         # Qualité de service (ici 'short' pour des jobs courts/prioritaires)
+#SBATCH --ntasks=8          # Nombre de cœurs CPU demandés (8 processeurs)
+#SBATCH --mem-per-cpu=10g   # Mémoire vive (RAM) par cœur (Total = 8 * 10g = 80Go)
+#SBATCH --time=10:00:00     # Temps limite alloué (10 heures max, sinon le job est tué)
+#SBATCH --output=$HOME/scratch/fastqFileQC/results/alignements/logs/%x_%j.out
+#SBATCH --error=$HOME/scratch/fastqFileQC/results/alignements/logs/%x_%j.err
+
+
+# Chemin vers l'environnement STAR
+export PATH="$HOME/micromamba/envs/STAR/bin:$PATH"
+
+# --- DÉFINITION DES VARIABLES ---
+cores=8
+projPath="$HOME/scratch/fastqFileQC"
+genomeDir="${projPath}/genome_index/star"                                       # Dossier où sera stocké l'index généré par STAR
+
+# --- CRÉATION DE L'ARBORESCENCE ---
+# L'option -p permet de créer les dossiers parents s'ils n'existent pas et ne plante pas si le dossier existe déjà
+mkdir -p ${projPath}/results/alignements/sam
+mkdir -p ${projPath}/results/alignements/bam 
+mkdir -p ${projPath}/results/alignements/logs
+
+
+# ==============================================================================
+# ÉTAPE 2 : ALIGNEMENT (MAPPING)
+# ==============================================================================
+# C'est ici qu'on map les reads (fastq) sur le génome.
+
+sample="5-HV1GZMBi_S1_L001"   # Nom de l'échantillon à traiter
+
+echo "Début de l'alignement pour l'échantillon : ${sample}"
+
+
+# --runThreadN : Utilise les 8 cœurs pour le calcul.
+# --genomeDir : Indique à STAR où se trouve l'index (la "carte" du génome).
+# --readFilesIn : Les fichiers d'entrée (R1 et R2 pour le séquençage paired-end).
+# --readFilesCommand zcat : INDISPENSABLE car vos fichiers sont compressés (.gz). Ça dit à STAR de les décompresser à la volée.
+# --outFileNamePrefix : Préfixe pour nommer les fichiers de sortie (ex: H3K27me3_Aligned.sortedByCoord.out.bam).
+# --outSAMtype BAM SortedByCoordinate : Sort un fichier BAM (binaire, plus léger que SAM) et le trie directement par position (prêt pour IGV).
+
+
+STAR \
+ --runThreadN ${cores} \
+ --genomeDir ${genomeDir} \
+ --readFilesIn \
+   ${projPath}/results/Trimming/${sample}_R1_001_paired.fastq.gz \
+   ${projPath}/results/Trimming/${sample}_R2_001_paired.fastq.gz \
+ --readFilesCommand zcat \
+ --outSAMtype BAM SortedByCoordinate \
+ --outFileNamePrefix ${projPath}/results/alignements/bam/${sample}_
+
+echo "Fin du job."
