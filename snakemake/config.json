@@ -34,12 +34,48 @@
 		"23":"chrX.fa",
 		"24":"chrY.fa"		
 	},
+  
+  "samples" : 
+  { 
+    "sample_01":"NS133_cutNtag_260613/NS133_cutNtag_260613_1/No_perm_50K_1_S18_L001_R1_001.fastq.gz",
+    "sample_02":"NS133_cutNtag_260613/NS133_cutNtag_260613_1/No_perm_50K_1_S18_L001_R2_001.fastq.gz",
+    "sample_03":"NS133_cutNtag_260613/NS133_cutNtag_260613_1/No_perm_50K_1_S18_L002_R1_001.fastq.gz",
+    "sample_04":"NS133_cutNtag_260613/NS133_cutNtag_260613_1/No_perm_50K_1_S18_L002_R2_001.fastq.gz",
+    "sample_05":"NS133_cutNtag_260613/NS133_cutNtag_260613_2/No_perm_100K_2_S19_L001_R1_001.fastq.gz",
+    "sample_06":"NS133_cutNtag_260613/NS133_cutNtag_260613_2/No_perm_100K_2_S19_L001_R2_001.fastq.gz",
+    "sample_07":"NS133_cutNtag_260613/NS133_cutNtag_260613_2/No_perm_100K_2_S19_L002_R1_001.fastq.gz",
+    "sample_08":"NS133_cutNtag_260613/NS133_cutNtag_260613_2/No_perm_100K_2_S19_L002_R2_001.fastq.gz",
+    "sample_09":"NS133_cutNtag_260613/NS133_cutNtag_260613_3/perm_50K_3_S20_L001_R1_001.fastq.gz",
+    "sample_10":"NS133_cutNtag_260613/NS133_cutNtag_260613_3/perm_50K_3_S20_L001_R2_001.fastq.gz",
+    "sample_11":"NS133_cutNtag_260613/NS133_cutNtag_260613_3/perm_50K_3_S20_L002_R1_001.fastq.gz",
+    "sample_12":"NS133_cutNtag_260613/NS133_cutNtag_260613_3/perm_50K_3_S20_L002_R2_001.fastq.gz",
+    "sample_13":"NS133_cutNtag_260613/NS133_cutNtag_260613_4/perm_100K_4_S21_L001_R1_001.fastq.gz",
+    "sample_14":"NS133_cutNtag_260613/NS133_cutNtag_260613_4/perm_100K_4_S21_L001_R2_001.fastq.gz",
+    "sample_15":"NS133_cutNtag_260613/NS133_cutNtag_260613_4/perm_100K_4_S21_L002_R1_001.fastq.gz",
+    "sample_16":"NS133_cutNtag_260613/NS133_cutNtag_260613_4/perm_100K_4_S21_L002_R2_001.fastq.gz",
+    "sample_17":"NS174_cutNtag_240206/NS174_100K_1_S3_R1_001.fastq.gz",
+    "sample_18":"NS174_cutNtag_240206/NS174_100K_1_S3_R2_001.fastq.gz",
+    "sample_19":"NS174_cutNtag_240206/NS174_100K_2_S4_R1_001.fastq.gz",
+    "sample_20":"NS174_cutNtag_240206/NS174_100K_2_S3_R2_001.fastq.gz",
+    "sample_21":"NS174_cutNtag_240206/NS174_100K_1_fixe_S3_R1_001.fastq.gz",
+    "sample_22":"NS174_cutNtag_240206/NS174_100K_1_fixe_S3_R2_001.fastq.gz",
+    "sample_23":"NS174_cutNtag_240206/NS174_100K_2_fixe_S4_R1_001.fastq.gz",
+    "sample_24":"NS174_cutNtag_240206/NS174_100K_2_fixe_S4_R2_001.fastq.gz",
+    "sample_25":"NS189_cutNtag_240418/5-HV1GZMBi_S1_L001_R1_001.fastq.gz",
+    "sample_26":"NS189_cutNtag_260613/5-HV1GZMBi_S1_L001_R2_001.fastq.gz",
+    "sample_27":"NS189_cutNtag_260613/5-HV1GZMBi_S1_L002_R1_001.fastq.gz",
+    "sample_28":"NS189_cutNtag_260613/5-HV1GZMBi_S1_L002_R2_001.fastq.gz",
+    "sample_29":"NS133_cutNtag_260613/5-HV1GZMBi_S2_L001_R1_001.fastq.gz",
+    "sample_30":"NS133_cutNtag_260613/5-HV1GZMBi_S2_L001_R2_001.fastq.gz",
+    "sample_31":"NS133_cutNtag_260613/5-HV1GZMBi_S2_L002_R1_001.fastq.gz",
+    "sample_32":"NS133_cutNtag_260613/5-HV1GZMBi_S1_L002_R2_001.fastq.gz",
+  }
+  
+  
 	"chrom_sizes":"/LAB-DATA/GLiCID/users/mmorin@ec-nantes.fr/DataBases/Hg38/hg38.chrom.sizes",
 	"gtffile":"/LAB-DATA/GLiCID/users/mmorin@ec-nantes.fr/DataBases/RefSeq/hg38.ncbiRefSeq.gtf",
 	"adapters":"${projPath}/tools/Trimmomatic/adapters/TruSeq3-PE.fa",
 	"rawdir":"/LAB-DATA/GLiCID/users/mmorin@ec-nantes.fr/imokit/rawdata/PAREAN/fastq",
-	"bedfile_FANTOM":"/LAB-DATA/GLiCID/users/mmorin@ec-nantes.fr/DataBases/FANTOM5/F5.hg38.enhancers.bed",
-	"bedfile_ENCODE":"/LAB-DATA/GLiCID/users/mmorin@ec-nantes.fr/DataBases/ENCODE/GRCh38-cCREs.bed",
 
 	 
   "fastqc_threads": 8,
