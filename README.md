@@ -6,3 +6,7 @@ Ce repository contient les scripts pour télécharger, installer et executer les
 
 ```bash
 sbatch scripts/Obtain_FastQC
+
+02/02/2026 Isaline git commit -m "suppression de toutes les variables dans config.json qu'on ne va pas utiliser"
+05/02/2026 Isaline git commit -m "première modification et création des règles correspondant aux 3 premières étapes du pipeline (fast qc sur les fichiers bruts, trimming, fast qc sur les fichiers trimmés)"
+
