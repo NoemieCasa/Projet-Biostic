@@ -48,9 +48,6 @@ def get_files_for_multiqc(wildcards):
         files.append(f"{Workdir}/logs/trimmomatic/err_trimmomatic_{s}.txt")
     return files
 
-# 4. Liste des fichiers FASTA pour l'indexation du génome
-FastaFileDir = config["fastafiledir"]
-FastaFiles = [f"{FastaFileDir}/{f}" for f in config["fastafiles"].values()]
 
 # 5. Fonctions pour Trinity (Concaténation par virgules pour tous les samples)
 def get_all_trimmed_r1(wildcards):
