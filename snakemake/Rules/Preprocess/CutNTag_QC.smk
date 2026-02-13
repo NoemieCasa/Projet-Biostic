@@ -81,7 +81,7 @@ rule Fastqc_trim:
 # ============================================================
 rule star:
     input:
-        index=f"{Workdir}/genome_index/star",
+        index=f"/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/genome_index/star",
         r1 = f"{Workdir}/Trimming/{{sample}}_R1_001_paired.fastq.gz",
         r2 = f"{Workdir}/Trimming/{{sample}}_R2_001_paired.fastq.gz"
     output:
@@ -159,6 +159,7 @@ rule Sort_Bam:
         samtools sort -o {output.star} {input.star} 2> {log}
         samtools index -b {output.star} 2>> {log}
         """
+
 
 
 
