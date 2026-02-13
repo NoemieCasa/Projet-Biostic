@@ -9,9 +9,10 @@ rule Fastqc_raw:
         	r1_html = f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html",
         	r2_html = f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R2_001_fastqc.html"
 	params:
-		outdir=f"{Workdir}/FastQC/fastqc_raw/"
+		outdir=f"{Workdir}/results/fastqc_raw/"
 	log:
 		f"{Workdir}/logs/fasrqc_raw/err_fastqc_{{raw_sample}}.txt"
+
 	threads: 
 		1
 	shell:
@@ -33,6 +34,7 @@ rule Trimmomatic:
         	r1_unpaired = f"{Workdir}/Trimming/{{sample}}_R1_001_unpaired.fastq.gz",
         	r2_paired = f"{Workdir}/Trimming/{{sample}}_R2_001_paired.fastq.gz",
         	r2_unpaired = f"{Workdir}/Trimming/{{sample}}_R2_001_unpaired.fastq.gz"
+
 	log:
 		f"{Workdir}/logs/trimmomatic/err_trimmomatic_{{sample}}.txt"
 	params:
@@ -121,6 +123,43 @@ rule samtools_stats:
 		out_star=f"{Workdir}/samstats/star/{{sample}}_star/"
 	log:
 		f"{Workdir}/logs/samtools_stats/err_{{sample}}.txt"
+=======
+	input:
+		index=f"{Workdir}/genome_index/star",
+		r1 = f"{Workdir}/results/Trimming/{{sample}}_R1_001_paired.fastq.gz",
+		r2 = f"{Workdir}/results/Trimming/{{sample}}_R2_001_paired.fastq.gz"
+	output:
+		bam=temp(f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam"),
+		summary=f"{Workdir}/alignment/star/{{sample}}.starLog.final.out"
+	params:
+		outpre=f"{Workdir}/alignment/star/{{sample}}.star",
+		index=f"{Workdir}/DataBases/HG38_fasta/STAR_index/"
+	log:
+		f"{Workdir}/logs/star/err_star_{{sample}}.txt"
+	resources:
+		mem_mb=32000,
+		runtime="5h"
+	threads: 
+		8
+	shell:
+		"""
+		micromamba activate STAR
+		STAR --runThreadN {threads} --genomeDir {params.index} --readFilesIn {input.r1} {input.r2} --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate --outFileNamePrefix {params.outpre} 2> {log}
+		"""
+		
+
+# ============================================================
+# Samtools stats
+# ============================================================
+rule samtools_stats:
+	input:
+		star=f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam"
+	output:
+		stats_star=f"{Workdir}/samstats/star/{{sample}}.star.stats"
+	params:
+		out_star=f"{Workdir}/samstats/star/{{sample}}_star/"
+	log:
+		f"{Workdir}/logs/samtools_stats/err_{{sample}}.txt"
 	threads: 
 		1
 	shell:
@@ -128,6 +167,26 @@ rule samtools_stats:
 		micromamba activate Samtools
 		samtools stats {input.star} > {output.stats_star} 2> {log}
 		plot-bamstats -p {params.out_star} {output.stats_star} 2>> {log}
+		"""
+
+
+# ============================================================
+# Filter Star Bam
+# ============================================================
+rule Filter_Bam:
+	input:
+		star=f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam"
+	output:
+		star=temp(f"{Workdir}/alignment/star/{{sample}}.star.filter.bam")
+	log:
+		f"{Workdir}/logs/Filter/err_filter_{{sample}}.txt"
+>>>>>>> 72c963f94e79f6875e12c2d3dfffaca11e0de2fe
+	threads: 
+		1
+	shell:
+		"""
+		micromamba activate Samtools
+		samtools view -q 10 -b -o {output.star} {input.star} 2> {log}
 		"""
 
 
@@ -170,4 +229,3 @@ rule Sort_Bam:
 		micromamba activate Samtools
 		samtools sort -o {output.star} {input.star} 2> {log}
 		samtools index -b {output.star} 2>> {log}
-		"""
