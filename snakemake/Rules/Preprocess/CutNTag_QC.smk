@@ -15,6 +15,7 @@ rule Fastqc_raw:
     threads: 1
     shell:
         """
+        eval "$(micromamba shell hook --shell=bash)"
         micromamba activate fastqc
         mkdir -p {params.outdir}
         fastqc {input.r1} {input.r2} -o {params.outdir} 2> {log}
@@ -42,6 +43,7 @@ rule Trimmomatic:
     threads: 6
     shell:
         """
+        eval "$(micromamba shell hook --shell=bash)"
         micromamba activate trimmomatic
         mkdir -p {Workdir}/results/Trimming
         trimmomatic PE \
@@ -71,6 +73,7 @@ rule Fastqc_trim:
     threads: 1
     shell:
         """
+        eval "$(micromamba shell hook --shell=bash)"
         micromamba activate fastqc
         fastqc {input.r1} -o {params.outdir} 2> {log}
         fastqc {input.r2} -o {params.outdir} 2>> {log}
@@ -98,6 +101,7 @@ rule star:
     threads: 8
     shell:
         """
+        eval "$(micromamba shell hook --shell=bash)"
         micromamba activate STAR
         STAR --runThreadN {threads} --genomeDir {params.index} --readFilesIn {input.r1} {input.r2} --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate --outFileNamePrefix {params.outpre} 2> {log}
         """
@@ -117,6 +121,7 @@ rule samtools_stats:
     threads: 1
     shell:
         """
+        eval "$(micromamba shell hook --shell=bash)"
         micromamba activate Samtools
         samtools stats {input.star} > {output.stats_star} 2> {log}
         plot-bamstats -p {params.out_star} {output.stats_star} 2>> {log}
@@ -135,6 +140,7 @@ rule Filter_Bam:
     threads: 1
     shell:
         """
+        eval "$(micromamba shell hook --shell=bash)"
         micromamba activate Samtools
         samtools view -q 10 -b -o {output.star} {input.star} 2> {log}
         """
@@ -155,10 +161,12 @@ rule Sort_Bam:
         runtime="3h"
     shell:
         """
+        eval "$(micromamba shell hook --shell=bash)"
         micromamba activate Samtools
         samtools sort -o {output.star} {input.star} 2> {log}
         samtools index -b {output.star} 2>> {log}
         """
+
 
 
 
