@@ -3,7 +3,8 @@
 # ============================================================
 rule Fastqc_raw:
     input:
-        unpack(get_raw_fastq)
+        r1 = f"{DataPath}/{{sample}}_R1_001.fastq.gz",
+        r2 = f"{DataPath}/{{sample}}_R2_001.fastq.gz"
     output:
         r1_html = f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html",
         r2_html = f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R2_001_fastqc.html"
@@ -160,4 +161,5 @@ rule Sort_Bam:
         samtools sort -o {output.star} {input.star} 2> {log}
         samtools index -b {output.star} 2>> {log}
         """
+
 
