@@ -44,9 +44,9 @@
         "fixe_100K_11": "NS174_cutNtag_240206/NS174_100k_fixe_1_S1",
         "fixe_100K_12": "NS174_cutNtag_240206/NS174_100k_fixe_2_S2",
         "HV_01_01": "NS189_cutNtag_240418/5-HV1GZMBi_S1_L001",
-        "HV_01_02": "NS189_cutNtag_260613/5-HV1GZMBi_S1_L002",
-        "HV_02_01": "NS133_cutNtag_260613/5-HV1GZMBi_S2_L001",
-        "HV_02_02": "NS133_cutNtag_260613/5-HV1GZMBi_S2_L002"
+        "HV_01_02": "NS189_cutNtag_240418/5-HV1GZMBi_S1_L002",
+        "HV_02_01": "NS133_cutNtag_240418/6-HV2GZMBi_S2_L001",
+        "HV_02_02": "NS133_cutNtag_240418/6-HV2GZMBi_S2_L002"
     },
     "chrom_sizes": "/LAB-DATA/GLiCID/users/mmorin@ec-nantes.fr/DataBases/Hg38/hg38.chrom.sizes",
     "gtffile": "/LAB-DATA/GLiCID/users/mmorin@ec-nantes.fr/DataBases/RefSeq/hg38.ncbiRefSeq.gtf",
