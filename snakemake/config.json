@@ -1,6 +1,6 @@
 {
     "snakedir": "~/Projet-Biostic/snakemake",
-    "projPath": "~//Projet-Biostic",
+    "projPath": "~/Projet-Biostic",
     "workdir": "~/scratch/cutNtag/results",
     "DataPath": "/LAB-DATA/GLiCID/projects/CR2TI_lab/TEAM3/Projects/Proenc_CutNTag/CutTag",
     "fastafiledir": "/LAB-DATA/GLiCID/projects/CR2TI_lab/TEAM3/Databases/FASTA/Hg38",
