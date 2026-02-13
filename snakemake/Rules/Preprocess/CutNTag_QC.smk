@@ -3,21 +3,21 @@
 # ============================================================
 rule Fastqc_raw:
     input:
-        r1 = f"{DataPath}/{{sample}}_R1_001.fastq.gz",
-        r2 = f"{DataPath}/{{sample}}_R2_001.fastq.gz"
+        unpack(get_raw_fastq)
     output:
         r1_html = f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html",
         r2_html = f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R2_001_fastqc.html"
     params:
-        outdir=f"{Workdir}/results/fastqc_raw/"
+        # On crée un dossier par sample pour éviter que FastQC ne mélange tout
+        outdir = f"{Workdir}/FastQC/fastqc_raw/{{sample}}"
     log:
-        f"{Workdir}/logs/fasrqc_raw/err_fastqc_{{sample}}.txt"
+        f"{Workdir}/logs/fastqc_raw/err_fastqc_{{sample}}.txt"
     threads: 1
     shell:
         """
         micromamba activate fastqc
-        fastqc {input.r1} -o {params.outdir} 2> {log}
-        fastqc {input.r2} -o {params.outdir} 2>> {log}
+        mkdir -p {params.outdir}
+        fastqc {input.r1} {input.r2} -o {params.outdir} 2> {log}
         """
 
 # ============================================================
@@ -160,3 +160,4 @@ rule Sort_Bam:
         samtools sort -o {output.star} {input.star} 2> {log}
         samtools index -b {output.star} 2>> {log}
         """
+
