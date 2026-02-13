@@ -9,9 +9,9 @@ rule Fastqc_raw:
         	r1_html = f"{Workdir}/results/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html",
         	r2_html = f"{Workdir}/results/fastqc_raw/{{sample}}/{{sample}}_R2_001_fastqc.html"
 	params:
-		outdir=f"{Workdir}/FastQC/fastqc_raw/"
+		outdir=f"{Workdir}/results/fastqc_raw/"
 	log:
-		f"{Workdir}/logs/FastQC/results/err_fastqc_{{raw_sample}}.txt"
+		f"{Workdir}/logs/FastQC/err_fastqc_{{raw_sample}}.txt"
 	threads: 
 		1
 	shell:
@@ -33,7 +33,8 @@ rule Trimmomatic:
         	r1_unpaired = f"{Workdir}/results/Trimming/{{sample}}_R1_001_unpaired.fastq.gz",
         	r2_paired = f"{Workdir}/results/Trimming/{{sample}}_R2_001_paired.fastq.gz",
         	r2_unpaired = f"{Workdir}/results/Trimming/{{sample}}_R2_001_unpaired.fastq.gz"
-		log=f"{Workdir}/logs/trimmomatic/err_trimmomatic_{{sample}}.txt"
+	log:
+		f"{Workdir}/logs/trimmomatic/err_trimmomatic_{{sample}}.txt"
 	params:
 		outdir=f"{Workdir}/results/Trimming/{{sample}}_trimmed.fastq.gz",
 		adapters=config["adapters"]
@@ -70,7 +71,7 @@ rule Fastqc_trim:
 	params:
 		outdir=f"{Workdir}/results/fastqc_trimmed/"
 	log:
-		f"{Workdir}/logs/results/fastqc_trimmed/err_fastqc_{{sample}}.txt"
+		f"{Workdir}/logs/fastqc_trimmed/err_fastqc_{{sample}}.txt"
 	threads: 
 		1
 	shell:
@@ -83,6 +84,90 @@ rule Fastqc_trim:
 # ============================================================
 # Alignement avec Star
 # ============================================================
-rule alignement:
+rule star:
 	input:
+		index=f"{Workdir}/genome_index/star",
+		r1 = f"{Workdir}/results/Trimming/{{sample}}_R1_001_paired.fastq.gz",
+		r2 = f"{Workdir}/results/Trimming/{{sample}}_R2_001_paired.fastq.gz"
+	output:
+		bam=temp(f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam"),
+		summary=f"{Workdir}/alignment/star/{{sample}}.starLog.final.out"
+	params:
+		outpre=f"{Workdir}/alignment/star/{{sample}}.star",
+		index=f"{Workdir}/DataBases/HG38_fasta/STAR_index/"
+	log:
+		f"{Workdir}/logs/star/err_star_{{sample}}.txt"
+	resources:
+		mem_mb=32000,
+		runtime="5h"
+	threads: 
+		8
+	shell:
+		"""
+		micromamba activate STAR
+		STAR --runThreadN {threads} --genomeDir {params.index} --readFilesIn {input.r1} {input.r2} --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate --outFileNamePrefix {params.outpre} 2> {log}
+		"""
+		
 
+# ============================================================
+# Samtools stats
+# ============================================================
+rule samtools_stats:
+	input:
+		star=f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam"
+	output:
+		stats_star=f"{Workdir}/samstats/star/{{sample}}.star.stats"
+	params:
+		out_star=f"{Workdir}/samstats/star/{{sample}}_star/"
+	log:
+		f"{Workdir}/logs/samtools_stats/err_{{sample}}.txt"
+	threads: 
+		1
+	shell:
+		"""
+		micromamba activate Samtools
+		samtools stats {input.star} > {output.stats_star} 2> {log}
+		plot-bamstats -p {params.out_star} {output.stats_star} 2>> {log}
+		"""
+
+
+# ============================================================
+# Filter Star Bam
+# ============================================================
+rule Filter_Bam:
+	input:
+		star=f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam"
+	output:
+		star=temp(f"{Workdir}/alignment/star/{{sample}}.star.filter.bam")
+	log:
+		f"{Workdir}/logs/Filter/err_filter_{{sample}}.txt"
+	threads: 
+		1
+	shell:
+		"""
+		micromamba activate Samtools
+		samtools view -q 10 -b -o {output.star} {input.star} 2> {log}
+		"""
+
+
+# ============================================================
+# Sort Star Bam
+# ============================================================
+rule Sort_Bam:
+	input:
+		star=f"{Workdir}/alignment/star/{{sample}}.star.filter.bam"
+	output:
+		star=f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam"
+	log:
+		f"{Workdir}/logs/Sort/err_sort_{{sample}}.txt"
+	threads: 
+		2
+	resources:
+		mem_mb=10000,
+		runtime="3h"
+	shell:
+		"""
+		micromamba activate Samtools
+		samtools sort -o {output.star} {input.star} 2> {log}
+		samtools index -b {output.star} 2>> {log}
+		"""
