@@ -3,18 +3,15 @@
 ###########################
 shell.prefix("set -o pipefail; ")
 shell.executable("/bin/bash")
+# Attention : vérifie que ce chemin .bashrc est correct pour ton utilisateur
 shell.prefix("source /home/mmorin@ec-nantes.fr/.bashrc; ")
+
 configfile: "config.json"
+
 Snakedir = config["snakedir"]
 Workdir = config["workdir"]
 DataPath = config["DataPath"]
 
-
-#########################
-###Set other variables###
-#########################
-Conda_Dir = f"{Snakedir}/Conda_envs"
-	
 ##################
 ###Load Modules###
 ##################
@@ -24,38 +21,26 @@ import pandas as pd
 ### Load functions ###
 #####################
 
-# 1. Liste simple des IDs d'échantillons (ex: HV_01_01)
+# 1. Liste simple des IDs d'échantillons
 SAMPLES = list(config["samples"].keys())
 
-# 2. Fonction de correspondance pour trouver les fichiers BRUTS (Fastq de départ)
-# Elle fait le pont entre "HV_01_01" et le chemin long dans /LAB-DATA/
+# 2. LA FONCTION CRUCIALE : Elle traduit l'ID court en chemin long du serveur
 def get_raw_fastq(wildcards):
-    # Récupère le préfixe du fichier depuis le config
+    # Va chercher la valeur dans le config.json (ex: "NS133.../MonFichier")
     file_prefix = config["samples"][wildcards.sample]
-    r1 = f"{DataPath}/{file_prefix}_R1_001.fastq.gz"
-    r2 = f"{DataPath}/{file_prefix}_R2_001.fastq.gz"
-    return {"r1": r1, "r2": r2}
+    return {
+        "r1": f"{DataPath}/{file_prefix}_R1_001.fastq.gz",
+        "r2": f"{DataPath}/{file_prefix}_R2_001.fastq.gz"
+    }
 
-# 3. Liste des fichiers pour MultiQC (FastQC et Trimmomatic)
-# On utilise expand() pour générer automatiquement la liste pour TOUS les échantillons
+# 3. Liste pour MultiQC
 def get_files_for_multiqc(wildcards):
     files = []
     for s in SAMPLES:
-        # On ajoute les zips de FastQC (ceux définis dans tes règles)
-        files.append(f"{Workdir}/FastQC/fastqc_raw/{s}/{config['samples'][s]}_R1_001_fastqc.zip")
-        files.append(f"{Workdir}/FastQC/fastqc_raw/{s}/{config['samples'][s]}_R2_001_fastqc.zip")
-        # On ajoute les logs de Trimmomatic
+        files.append(f"{Workdir}/FastQC/fastqc_raw/{s}/{s}_R1_001_fastqc.zip")
+        files.append(f"{Workdir}/FastQC/fastqc_raw/{s}/{s}_R2_001_fastqc.zip")
         files.append(f"{Workdir}/logs/trimmomatic/err_trimmomatic_{s}.txt")
     return files
-
-
-# 5. Fonctions pour Trinity (Concaténation par virgules pour tous les samples)
-def get_all_trimmed_r1(wildcards):
-    return ",".join(expand(f"{Workdir}/Trimming/{{sample}}_R1_001_paired.fastq.gz", sample=SAMPLES))
-
-def get_all_trimmed_r2(wildcards):
-    return ",".join(expand(f"{Workdir}/Trimming/{{sample}}_R2_001_paired.fastq.gz", sample=SAMPLES))
-
 
 ##################
 ###target rules###
@@ -66,14 +51,12 @@ rule all:
         expand(f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html", sample=SAMPLES),
         # Trimming
         expand(f"{Workdir}/Trimming/{{sample}}_R1_001_paired.fastq.gz", sample=SAMPLES),
-        # Alignement
-        expand(f"{Workdir}/alignment/star/{{sample}}.starLog.final.out", sample=SAMPLES)
-		
+        # Alignement (BAM final trié)
+        expand(f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam", sample=SAMPLES),
+        # Stats d'alignement
+        expand(f"{Workdir}/samstats/star/{{sample}}.star.stats", sample=SAMPLES)
 
-	
 ##################
 ###import rules###
 ##################
-# Rules for preprocesses and QCs
 include: "Rules/Preprocess/CutNTag_QC.smk"
-
