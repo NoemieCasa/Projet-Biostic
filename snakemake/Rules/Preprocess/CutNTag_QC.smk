@@ -123,7 +123,6 @@ rule samtools_stats:
 		out_star=f"{Workdir}/samstats/star/{{sample}}_star/"
 	log:
 		f"{Workdir}/logs/samtools_stats/err_{{sample}}.txt"
-=======
 	input:
 		index=f"{Workdir}/genome_index/star",
 		r1 = f"{Workdir}/results/Trimming/{{sample}}_R1_001_paired.fastq.gz",
@@ -180,7 +179,6 @@ rule Filter_Bam:
 		star=temp(f"{Workdir}/alignment/star/{{sample}}.star.filter.bam")
 	log:
 		f"{Workdir}/logs/Filter/err_filter_{{sample}}.txt"
->>>>>>> 72c963f94e79f6875e12c2d3dfffaca11e0de2fe
 	threads: 
 		1
 	shell:
@@ -229,3 +227,4 @@ rule Sort_Bam:
 		micromamba activate Samtools
 		samtools sort -o {output.star} {input.star} 2> {log}
 		samtools index -b {output.star} 2>> {log}
+
