@@ -7,10 +7,8 @@ shell.prefix("source /home/mmorin@ec-nantes.fr/.bashrc; ")
 configfile: "config.json"
 Snakedir = config["snakedir"]
 Workdir = config["workdir"]
-Rawdir = config["rawdir"]
-FastaFileDir = config["fastafiledir"]
-Metascape = config["pathtometascape"]
-scdir = config["scRNAseqDir"]
+DataPath = config["DataPath"]
+
 
 #########################
 ###Set other variables###
