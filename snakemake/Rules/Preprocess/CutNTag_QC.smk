@@ -100,4 +100,63 @@ rule star:
     shell:
         """
         micromamba activate STAR
-        STAR --runThreadN {threads} --genomeDir {params.index} --readFilesIn {input.r1}
+        STAR --runThreadN {threads} --genomeDir {params.index} --readFilesIn {input.r1} {input.r2} --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate --outFileNamePrefix {params.outpre} 2> {log}
+        """
+
+# ============================================================
+# Samtools stats
+# ============================================================
+rule samtools_stats:
+    input:
+        star=f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam"
+    output:
+        stats_star=f"{Workdir}/samstats/star/{{sample}}.star.stats"
+    params:
+        out_star=f"{Workdir}/samstats/star/{{sample}}_star/"
+    log:
+        f"{Workdir}/logs/samtools_stats/err_{{sample}}.txt"
+    threads: 1
+    shell:
+        """
+        micromamba activate Samtools
+        samtools stats {input.star} > {output.stats_star} 2> {log}
+        plot-bamstats -p {params.out_star} {output.stats_star} 2>> {log}
+        """
+
+# ============================================================
+# Filter Star Bam
+# ============================================================
+rule Filter_Bam:
+    input:
+        star=f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam"
+    output:
+        star=temp(f"{Workdir}/alignment/star/{{sample}}.star.filter.bam")
+    log:
+        f"{Workdir}/logs/Filter/err_filter_{{sample}}.txt"
+    threads: 1
+    shell:
+        """
+        micromamba activate Samtools
+        samtools view -q 10 -b -o {output.star} {input.star} 2> {log}
+        """
+
+# ============================================================
+# Sort Star Bam
+# ============================================================
+rule Sort_Bam:
+    input:
+        star=f"{Workdir}/alignment/star/{{sample}}.star.filter.bam"
+    output:
+        star=f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam"
+    log:
+        f"{Workdir}/logs/Sort/err_sort_{{sample}}.txt"
+    threads: 2
+    resources:
+        mem_mb=10000,
+        runtime="3h"
+    shell:
+        """
+        micromamba activate Samtools
+        samtools sort -o {output.star} {input.star} 2> {log}
+        samtools index -b {output.star} 2>> {log}
+        """
