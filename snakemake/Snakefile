@@ -4,7 +4,7 @@
 shell.prefix("set -o pipefail; ")
 shell.executable("/bin/bash")
 # Attention : vérifie que ce chemin .bashrc est correct pour ton utilisateur
-shell.prefix("source /home/mmorin@ec-nantes.fr/.bashrc; ")
+shell.prefix("source /home/iguerin2024@ec-nantes.fr/.bashrc; ")
 
 configfile: "config.json"
 
