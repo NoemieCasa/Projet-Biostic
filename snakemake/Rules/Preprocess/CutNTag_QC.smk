@@ -82,7 +82,7 @@ rule Fastqc_trim:
 # ============================================================
 # Alignement avec Star
 # ============================================================
-rule star:
+rule Star:
     input:
         index=f"/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/genome_index/star",
         r1 = f"{Workdir}/Trimming/{{sample}}_R1_001_paired.fastq.gz",
@@ -166,6 +166,7 @@ rule Sort_Bam:
         samtools sort -o {output.star} {input.star} 2> {log}
         samtools index -b {output.star} 2>> {log}
         """
+
 
 
 
