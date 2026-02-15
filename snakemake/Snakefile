@@ -2,17 +2,17 @@
 ### Configuration Shell ###
 ###########################
 
-# 1. On définit le chemin vers TON installation micromamba
-MAMBA_ROOT = "/home/iguerin2024@ec-nantes.fr/micromamba"
+# 1. Le dossier qui contient les environnements (fastqc, STAR, etc.)
+MAMBA_ROOT_PREFIX = "/home/iguerin2024@ec-nantes.fr/micromamba"
 
-# 2. On configure le shell pour Nautilus
+# 2. Le chemin vers le programme micromamba 
+MAMBA_EXE = "/home/iguerin2024@ec-nantes.fr/.local/bin/micromamba"
+
 shell.executable("/bin/bash")
-
-# 3. Le préfixe magique : il définit la racine ET active le hook micromamba
 shell.prefix(
     f"set -o pipefail; "
-    f"export MAMBA_ROOT_PREFIX={MAMBA_ROOT}; "
-    f"eval \"$({MAMBA_ROOT}/bin/micromamba shell hook -s bash)\"; "
+    f"export MAMBA_ROOT_PREFIX={MAMBA_ROOT_PREFIX}; "
+    f"eval \"$({MAMBA_EXE} shell hook -s bash)\"; "
 )
 
 # Chargement du fichier config
