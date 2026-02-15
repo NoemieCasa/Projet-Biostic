@@ -109,7 +109,7 @@ rule star:
 # ============================================================
 # Samtools stats
 # ============================================================
-rule samtools_stats:
+rule Samtools_stats:
     input:
         star=f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam"
     output:
@@ -166,6 +166,7 @@ rule Sort_Bam:
         samtools sort -o {output.star} {input.star} 2> {log}
         samtools index -b {output.star} 2>> {log}
         """
+
 
 
 
