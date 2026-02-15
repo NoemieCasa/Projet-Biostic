@@ -1,16 +1,27 @@
 ###########################
-###Load file and Samples###
+### Configuration Shell ###
 ###########################
-shell.prefix("set -o pipefail; ")
+
+# 1. On définit le chemin vers TON installation micromamba
+MAMBA_ROOT = "/home/iguerin2024@ec-nantes.fr/micromamba"
+
+# 2. On configure le shell pour Nautilus
 shell.executable("/bin/bash")
-# Attention : vérifie que ce chemin .bashrc est correct pour ton utilisateur
-shell.prefix("source /home/iguerin2024@ec-nantes.fr/.bashrc; ")
 
+# 3. Le préfixe magique : il définit la racine ET active le hook micromamba
+shell.prefix(
+    f"set -o pipefail; "
+    f"export MAMBA_ROOT_PREFIX={MAMBA_ROOT}; "
+    f"eval \"$({MAMBA_ROOT}/bin/micromamba shell hook -s bash)\"; "
+)
+
+# Chargement du fichier config
 configfile: "config.json"
-
 Snakedir = config["snakedir"]
 Workdir = config["workdir"]
 DataPath = config["DataPath"]
+configfile: "config.json"
+
 
 ##################
 ###Load Modules###
