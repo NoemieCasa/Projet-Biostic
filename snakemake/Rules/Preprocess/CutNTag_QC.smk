@@ -45,7 +45,6 @@ rule Trimmomatic:
         """
         eval "$(micromamba shell hook --shell=bash)"
         micromamba activate trimmomatic
-        mkdir -p {Workdir}/Trimming
         trimmomatic PE \
         {input.r1} {input.r2} \
         {output.r1_paired} {output.r1_unpaired} \
@@ -166,6 +165,7 @@ rule Sort_Bam:
         samtools sort -o {output.star} {input.star} 2> {log}
         samtools index -b {output.star} 2>> {log}
         """
+
 
 
 
