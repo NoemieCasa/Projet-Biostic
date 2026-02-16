@@ -8,7 +8,6 @@ rule Fastqc_raw:
         r1_html = f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html",
         r2_html = f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R2_001_fastqc.html"
     params:
-        # On crée un dossier par sample pour éviter que FastQC ne mélange tout
         outdir = f"{Workdir}/FastQC/fastqc_raw/{{sample}}"
     log:
         f"{Workdir}/logs/fastqc_raw/err_fastqc_{{sample}}.txt"
@@ -17,17 +16,16 @@ rule Fastqc_raw:
         """
         eval "$(micromamba shell hook --shell=bash)"
         micromamba activate fastqc
+        mkdir -p {params.outdir}
 
         # On lance FastQC
         fastqc {input.r1} {input.r2} -o {params.outdir}
         
-        # On renomme le résultat du R1 pour correspondre à l'output attendu
-        # On cherche le fichier html qui vient d'être créé pour le R1 et on le renomme
-        mv {params.outdir}/$(basename {input.r1} .fastq.gz)_fastqc.html {output.html1}
+        # Correction des noms pour correspondre au bloc output ci-dessus
+        mv {params.outdir}/$(basename {input.r1} .fastq.gz)_fastqc.html {output.r1_html}
         mv {params.outdir}/$(basename {input.r1} .fastq.gz)_fastqc.zip {params.outdir}/{wildcards.sample}_R1_001_fastqc.zip
         
-        # On fait pareil pour le R2
-        mv {params.outdir}/$(basename {input.r2} .fastq.gz)_fastqc.html {output.html2}
+        mv {params.outdir}/$(basename {input.r2} .fastq.gz)_fastqc.html {output.r2_html}
         mv {params.outdir}/$(basename {input.r2} .fastq.gz)_fastqc.zip {params.outdir}/{wildcards.sample}_R2_001_fastqc.zip
         """
 
@@ -174,6 +172,7 @@ rule Sort_Bam:
         samtools sort -o {output.star} {input.star} 2> {log}
         samtools index -b {output.star} 2>> {log}
         """
+
 
 
 
