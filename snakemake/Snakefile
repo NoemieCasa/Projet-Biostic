@@ -60,13 +60,19 @@ rule all:
     input:
         # QC bruts
         expand(f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html", sample=SAMPLES),
+        
+        # QC après Trimming
+        expand(f"{Workdir}/FastQC/fastqc_trimmed/{{sample}}/{{sample}}_R1_001_paired_fastqc.html", sample=SAMPLES),
+        expand(f"{Workdir}/FastQC/fastqc_trimmed/{{sample}}/{{sample}}_R2_001_paired_fastqc.html", sample=SAMPLES),
+        
         # Trimming
         expand(f"{Workdir}/Trimming/{{sample}}_R1_001_paired.fastq.gz", sample=SAMPLES),
+        
         # Alignement (BAM final trié)
         expand(f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam", sample=SAMPLES),
+        
         # Stats d'alignement
         expand(f"{Workdir}/samstats/star/{{sample}}.star.stats", sample=SAMPLES)
-
 ##################
 ###import rules###
 ##################
