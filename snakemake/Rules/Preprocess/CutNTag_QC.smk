@@ -74,7 +74,8 @@ rule Fastqc_trim:
         r1_html = f"{Workdir}/FastQC/fastqc_trimmed/{{sample}}/{{sample}}_R1_001_paired_fastqc.html",
         r2_html = f"{Workdir}/FastQC/fastqc_trimmed/{{sample}}/{{sample}}_R2_001_paired_fastqc.html"
     params:
-        outdir=f"{Workdir}/fastqc_trimmed/"
+        # On utilise exactement le même chemin que l'output (sans le nom du fichier)
+        outdir = f"{Workdir}/FastQC/fastqc_trimmed/{{sample}}"
     log:
         f"{Workdir}/logs/fastqc_trimmed/err_fastqc_{{sample}}.txt"
     threads: 1
@@ -82,8 +83,9 @@ rule Fastqc_trim:
         """
         eval "$(micromamba shell hook --shell=bash)"
         micromamba activate fastqc
-        fastqc {input.r1} -o {params.outdir} 2> {log}
-        fastqc {input.r2} -o {params.outdir} 2>> {log}
+
+        # On lance FastQC sur les deux fichiers en même temps
+        fastqc {input.r1} {input.r2} -o {params.outdir} > {log} 2>&1
         """
 
 # ============================================================
@@ -172,6 +174,7 @@ rule Sort_Bam:
         samtools sort -o {output.star} {input.star} 2> {log}
         samtools index -b {output.star} 2>> {log}
         """
+
 
 
 
