@@ -1,0 +1,19 @@
+#!/bin/bash
+#SBATCH -J STEP0
+#SBATCH --cluster=nautilus
+#SBATCH --qos=short
+#SBATCH --ntasks=8
+#SBATCH --mem-per-cpu=10g
+#SBATCH --time=10:00:00
+
+# ligne 1 - création du génome de référence
+micromamba activate macs2
+macs2 callpeak -t tous_les_fichiers_bam_espaces -f BAMPE -g hs -n nom_sortie
+
+# ligne 2 - création de la matrice de compte 
+# télécharger featureCounts
+featureCounts -a nom_sortie_genome_ref.gtf -o count_matrix.txt -p --countReadPairs tous_les_fichiers_bam_espaces
+
+# ligne 3 - génération de la heatmap avec le script python
+
+
