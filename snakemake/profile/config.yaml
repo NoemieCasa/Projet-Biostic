@@ -1,4 +1,3 @@
----
 snakefile: Snakefile
 latency-wait: 300
 show-failed-logs: True
@@ -6,26 +5,14 @@ printshellcmds: True
 rerun-incomplete: True
 keep-going: True
 
-# use-singularity: True
-# singularity-args: "--bind /scratch/nautilus/users/mmorin@ec-nantes.fr/2024-05_IMoKiT/"
-
-until: Trimmomatic
-# immediate-submit: True
-
+#until: Trimmomatic
 notemp: True
 jobs: 25
-
 executor: slurm
 
-
 default-resources:
-    - slurm_extra="'--qos=priority'"
-    - slurm_account="team3"
-    - slurm_partition="standard"
-    - mem_mb=1000
-    - runtime=60
-
- 
-
-
-
+  slurm_extra: "'--qos=priority'"
+  slurm_account: "team3"
+  slurm_partition: "standard"
+  mem_mb: 1000
+  runtime: 60

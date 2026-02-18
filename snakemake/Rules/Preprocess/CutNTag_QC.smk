@@ -1,46 +1,63 @@
 # ============================================================
 # FastQC sur les FASTQ bruts
 # ============================================================
-rule obtain_fastqc:
+rule Fastqc_raw:
     input:
-        r1 = lambda wc: f"{config['raw_data_dir']}/{wc.sample}_R1_001.fastq.gz",
-        r2 = lambda wc: f"{config['raw_data_dir']}/{wc.sample}_R2_001.fastq.gz"
+        unpack(get_raw_fastq)
     output:
-        r1_html = f"{WORKDIR}/results/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html",
-        r2_html = f"{WORKDIR}/results/fastqc_raw/{{sample}}/{{sample}}_R2_001_fastqc.html"
-    threads: config["fastqc_threads"]
-    conda:
-        "envs/fastqc.yml"
+        r1_html = f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html",
+        r2_html = f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R2_001_fastqc.html"
+    params:
+        outdir = f"{Workdir}/FastQC/fastqc_raw/{{sample}}"
+    log:
+        f"{Workdir}/logs/fastqc_raw/err_fastqc_{{sample}}.txt"
+    threads: 1
     shell:
         """
-        mkdir -p {WORKDIR}/results/fastqc_raw/{wildcards.sample}
-        fastqc -t {threads} -o {WORKDIR}/results/fastqc_raw/{wildcards.sample} {input.r1}
-        fastqc -t {threads} -o {WORKDIR}/results/fastqc_raw/{wildcards.sample} {input.r2}
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate fastqc
+        mkdir -p {params.outdir}
+
+        # On lance FastQC
+        fastqc {input.r1} {input.r2} -o {params.outdir}
+        
+        # Correction des noms pour correspondre au bloc output ci-dessus
+        mv {params.outdir}/$(basename {input.r1} .fastq.gz)_fastqc.html {output.r1_html}
+        mv {params.outdir}/$(basename {input.r1} .fastq.gz)_fastqc.zip {params.outdir}/{wildcards.sample}_R1_001_fastqc.zip
+        
+        mv {params.outdir}/$(basename {input.r2} .fastq.gz)_fastqc.html {output.r2_html}
+        mv {params.outdir}/$(basename {input.r2} .fastq.gz)_fastqc.zip {params.outdir}/{wildcards.sample}_R2_001_fastqc.zip
         """
 
 # ============================================================
 # Trimming avec Trimmomatic
 # ============================================================
-rule trimming:
+rule Trimmomatic:
     input:
-        r1 = lambda wc: f"{config['raw_data_dir']}/{wc.sample}_R1_001.fastq.gz",
-        r2 = lambda wc: f"{config['raw_data_dir']}/{wc.sample}_R2_001.fastq.gz"
+        unpack(get_raw_fastq)
     output:
-        r1_paired = f"{WORKDIR}/results/Trimming/{{sample}}_R1_001_paired.fastq.gz",
-        r1_unpaired = f"{WORKDIR}/results/Trimming/{{sample}}_R1_001_unpaired.fastq.gz",
-        r2_paired = f"{WORKDIR}/results/Trimming/{{sample}}_R2_001_paired.fastq.gz",
-        r2_unpaired = f"{WORKDIR}/results/Trimming/{{sample}}_R2_001_unpaired.fastq.gz"
-    threads: config["trimmomatic_threads"]
+        r1_paired = f"{Workdir}/Trimming/{{sample}}_R1_001_paired.fastq.gz",
+        r1_unpaired = f"{Workdir}/Trimming/{{sample}}_R1_001_unpaired.fastq.gz",
+        r2_paired = f"{Workdir}/Trimming/{{sample}}_R2_001_paired.fastq.gz",
+        r2_unpaired = f"{Workdir}/Trimming/{{sample}}_R2_001_unpaired.fastq.gz"
+    log:
+        f"{Workdir}/logs/trimmomatic/err_trimmomatic_{{sample}}.txt"
+    params:
+        outdir=f"{Workdir}/Trimming/{{sample}}_trimmed.fastq.gz",
+        adapters=config["adapters"]
+    resources:
+        runtime=300,
+        mem_mb=10000
+    threads: 6
     shell:
         """
-	micromamba activate trimmomatic
-        mkdir -p {WORKDIR}/results/Trimming
-
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate trimmomatic
         trimmomatic PE \
         {input.r1} {input.r2} \
         {output.r1_paired} {output.r1_unpaired} \
         {output.r2_paired} {output.r2_unpaired} \
-        ILLUMINACLIP:{conda_prefix}/share/trimmomatic/adapters/{config[trimmomatic_adapters]}:2:30:10:2:True \
+        ILLUMINACLIP:{params.adapters}:2:30:10:2:True \
         LEADING:{config[leading]} \
         TRAILING:{config[trailing]} \
         MINLEN:{config[minlen]}
@@ -49,18 +66,123 @@ rule trimming:
 # ============================================================
 # FastQC après trimming
 # ============================================================
-rule run_fastqc_trimmed:
+rule Fastqc_trim:
     input:
-        r1 = f"{WORKDIR}/results/Trimming/{{sample}}_R1_001_paired.fastq.gz",
-        r2 = f"{WORKDIR}/results/Trimming/{{sample}}_R2_001_paired.fastq.gz"
+        r1 = f"{Workdir}/Trimming/{{sample}}_R1_001_paired.fastq.gz",
+        r2 = f"{Workdir}/Trimming/{{sample}}_R2_001_paired.fastq.gz"
     output:
-        r1_html = f"{WORKDIR}/results/fastqc_trimmed/{{sample}}/{{sample}}_R1_001_paired_fastqc.html",
-        r2_html = f"{WORKDIR}/results/fastqc_trimmed/{{sample}}/{{sample}}_R2_001_paired_fastqc.html"
-    threads: config["fastqc_threads"]
+        r1_html = f"{Workdir}/FastQC/fastqc_trimmed/{{sample}}/{{sample}}_R1_001_paired_fastqc.html",
+        r2_html = f"{Workdir}/FastQC/fastqc_trimmed/{{sample}}/{{sample}}_R2_001_paired_fastqc.html"
+    params:
+        # On utilise exactement le même chemin que l'output (sans le nom du fichier)
+        outdir = f"{Workdir}/FastQC/fastqc_trimmed/{{sample}}"
+    log:
+        f"{Workdir}/logs/fastqc_trimmed/err_fastqc_{{sample}}.txt"
+    threads: 1
     shell:
         """
-	micromamba activate fastqc
-        mkdir -p {WORKDIR}/results/fastqc_trimmed/{wildcards.sample}
-        fastqc -t {threads} -o {WORKDIR}/results/fastqc_trimmed/{wildcards.sample} {input.r1}
-        fastqc -t {threads} -o {WORKDIR}/results/fastqc_trimmed/{wildcards.sample} {input.r2}
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate fastqc
+
+        # On lance FastQC sur les deux fichiers en même temps
+        fastqc {input.r1} {input.r2} -o {params.outdir} > {log} 2>&1
         """
+
+# ============================================================
+# Alignement avec Star
+# ============================================================
+rule Star:
+    input:
+        index=f"/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/genome_index/star",
+        r1 = f"{Workdir}/Trimming/{{sample}}_R1_001_paired.fastq.gz",
+        r2 = f"{Workdir}/Trimming/{{sample}}_R2_001_paired.fastq.gz"
+    output:
+        bam=temp(f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam"),
+        summary=f"{Workdir}/alignment/star/{{sample}}.starLog.final.out"
+    params:
+        outpre=f"{Workdir}/alignment/star/{{sample}}.star",
+    log:
+        f"{Workdir}/logs/star/err_star_{{sample}}.txt"
+    resources:
+        mem_mb=32000,
+        runtime="5h"
+    threads: 8
+    shell:
+        """
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate STAR
+        STAR --runThreadN {threads} --genomeDir {input.index} --readFilesIn {input.r1} {input.r2} --readFilesCommand zcat --outSAMtype BAM SortedByCoordinate --outFileNamePrefix {params.outpre} 2> {log}
+        """
+
+# ============================================================
+# Samtools stats
+# ============================================================
+rule Samtools_stats:
+    input:
+        star=f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam"
+    output:
+        stats_star=f"{Workdir}/samstats/star/{{sample}}.star.stats"
+    params:
+        out_star=f"{Workdir}/samstats/star/{{sample}}_star/"
+    log:
+        f"{Workdir}/logs/samtools_stats/err_{{sample}}.txt"
+    threads: 1
+    shell:
+        """
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate Samtools
+        samtools stats {input.star} > {output.stats_star} 2> {log}
+        plot-bamstats -p {params.out_star} {output.stats_star} 2>> {log}
+        """
+
+# ============================================================
+# Filter Star Bam
+# ============================================================
+rule Filter_Bam:
+    input:
+        star=f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam"
+    output:
+        star=temp(f"{Workdir}/alignment/star/{{sample}}.star.filter.bam")
+    log:
+        f"{Workdir}/logs/Filter/err_filter_{{sample}}.txt"
+    threads: 1
+    shell:
+        """
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate Samtools
+        samtools view -q 10 -b -o {output.star} {input.star} 2> {log}
+        """
+
+# ============================================================
+# Sort Star Bam
+# ============================================================
+rule Sort_Bam:
+    input:
+        star=f"{Workdir}/alignment/star/{{sample}}.star.filter.bam"
+    output:
+        star=f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam"
+    log:
+        f"{Workdir}/logs/Sort/err_sort_{{sample}}.txt"
+    threads: 2
+    resources:
+        mem_mb=10000,
+        runtime="3h"
+    shell:
+        """
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate Samtools
+        samtools sort -o {output.star} {input.star} 2> {log}
+        samtools index -b {output.star} 2>> {log}
+        """
+
+
+
+
+
+
+
+
+
+
+
+
