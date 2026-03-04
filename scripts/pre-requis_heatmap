@@ -7,7 +7,6 @@
 #SBATCH --time=10:00:00
 
 # ligne 1 - création du génome de référence
-$ eval "$(micromamba shell hook --shell=)"
 micromamba activate macs2
 macs2 callpeak -t \
 /home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results/alignment/star/HV_01_01.starAligned.sortedByCoord.out.bam \
@@ -25,6 +24,7 @@ macs2 callpeak -t \
 
 # ligne 2 - création de la matrice de compte 
 # télécharger featureCounts
+micromamba activate Subread
 featureCounts -a genome_reference_macs2.gtf -o count_matrix.txt -p --countReadPairs \
 /home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results/alignment/star/HV_01_01.starAligned.sortedByCoord.out.bam \
 /home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results/alignment/star/HV_01_02.starAligned.sortedByCoord.out.bam \
