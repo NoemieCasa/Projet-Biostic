@@ -7,6 +7,7 @@
 #SBATCH --time=10:00:00
 
 # ligne 1 - création du génome de référence
+$ eval "$(micromamba shell hook --shell=)"
 micromamba activate macs2
 macs2 callpeak -t \
 /home/iguerin2024@ec-nantes.fr/scratch/nautilus/users/iguerin2024@ec-nantes.fr/cutNtag/results/alignment/star/HV_01_01.starAligned.sortedByCoord.out.bam \
