@@ -10,17 +10,17 @@
 $ eval "$(micromamba shell hook --shell=)"
 micromamba activate macs2
 macs2 callpeak -t \
-/home/iguerin2024@ec-nantes.fr/scratch/nautilus/users/iguerin2024@ec-nantes.fr/cutNtag/results/alignment/star/HV_01_01.starAligned.sortedByCoord.out.bam \
-/home/iguerin2024@ec-nantes.fr/scratch/nautilus/users/iguerin2024@ec-nantes.fr/cutNtag/results/alignment/star/HV_01_02.starAligned.sortedByCoord.out.bam \
-/home/iguerin2024@ec-nantes.fr/scratch/nautilus/users/iguerin2024@ec-nantes.fr/cutNtag/results/alignment/star/HV_02_01.starAligned.sortedByCoord.out.bam \
-/home/iguerin2024@ec-nantes.fr/scratch/nautilus/users/iguerin2024@ec-nantes.fr/cutNtag/results/alignment/star/No_fixe_100K_01.starAligned.sortedByCoord.out.bam \
-/home/iguerin2024@ec-nantes.fr/scratch/nautilus/users/iguerin2024@ec-nantes.fr/cutNtag/results/alignment/star/No_perm_100K_01.starAligned.sortedByCoord.out.bam \
-/home/iguerin2024@ec-nantes.fr/scratch/nautilus/users/iguerin2024@ec-nantes.fr/cutNtag/results/alignment/star/No_perm_100K_02.starAligned.sortedByCoord.out.bam \
-/home/iguerin2024@ec-nantes.fr/scratch/nautilus/users/iguerin2024@ec-nantes.fr/cutNtag/results/alignment/star/No_perm_50K_01.starAligned.sortedByCoord.out.bam \
-/home/iguerin2024@ec-nantes.fr/scratch/nautilus/users/iguerin2024@ec-nantes.fr/cutNtag/results/alignment/star/No_perm_50K_02.starAligned.sortedByCoord.out.bam \
-/home/iguerin2024@ec-nantes.fr/scratch/nautilus/users/iguerin2024@ec-nantes.fr/cutNtag/results/alignment/star/perm_100K_01.starAligned.sortedByCoord.out.bam \
-/home/iguerin2024@ec-nantes.fr/scratch/nautilus/users/iguerin2024@ec-nantes.fr/cutNtag/results/alignment/star/perm_100K_02.starAligned.sortedByCoord.out.bam \
-/home/iguerin2024@ec-nantes.fr/scratch/nautilus/users/iguerin2024@ec-nantes.fr/cutNtag/results/alignment/star/perm_50K_02.starAligned.sortedByCoord.out.bam \
+/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results/alignment/star/HV_01_01.starAligned.sortedByCoord.out.bam \
+/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results/alignment/star/HV_01_02.starAligned.sortedByCoord.out.bam \
+/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results/alignment/star/HV_02_01.starAligned.sortedByCoord.out.bam \
+/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results/alignment/star/No_fixe_100K_01.starAligned.sortedByCoord.out.bam \
+/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results/alignment/star/No_perm_100K_01.starAligned.sortedByCoord.out.bam \
+/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results/alignment/star/No_perm_100K_02.starAligned.sortedByCoord.out.bam \
+/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results/alignment/star/No_perm_50K_01.starAligned.sortedByCoord.out.bam \
+/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results/alignment/star/No_perm_50K_02.starAligned.sortedByCoord.out.bam \
+/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results/alignment/star/perm_100K_01.starAligned.sortedByCoord.out.bam \
+/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results/alignment/star/perm_100K_02.starAligned.sortedByCoord.out.bam \
+/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results/alignment/star/perm_50K_02.starAligned.sortedByCoord.out.bam \
 -f BAMPE -g hs -n genome_reference_macs2
 
 # ligne 2 - création de la matrice de compte 
