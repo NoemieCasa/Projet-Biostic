@@ -76,7 +76,7 @@ rule all:
 
         # bed et bigwig
         expand(f"{Workdir}/bigwig/{{sample}}.bw", sample=SAMPLES),
-        f"{Workdir}/macs2/all_samples.bed"
+        f"{Workdir}/macs2/all_samples_peaks.narrowPeak"
 ##################
 ###import rules###
 ##################
