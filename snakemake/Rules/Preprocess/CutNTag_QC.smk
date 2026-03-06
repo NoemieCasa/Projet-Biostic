@@ -200,40 +200,7 @@ rule macs2_callpeak:
         """
 
 
-# ============================================================
-# peaks_to_gtf
-# ============================================================
-rule peaks_to_gtf:
-    input:
-        "results/macs2/{sample}_peaks.narrowPeak"
-    output:
-        "results/annotation/{sample}.gtf"
-    shell:
-        """
-        awk 'BEGIN{{OFS="\t"}} 
-        {{print $1,"MACS2","peak",$2,$3,".",".",".","gene_id \"peak"NR"\";"}}' \
-        {input} > {output}
-        """
 
-# ============================================================
-# peaks_to_gtf
-# ============================================================
-rule featurecounts:
-    input:
-        bam="results/alignment/sorted/{sample}.sorted.bam",
-        gtf="results/annotation/{sample}.gtf"
-    output:
-        "results/counts/{sample}_counts.txt"
-    conda:
-        "envs/subread.yaml"
-    shell:
-        """
-        featureCounts \
-        -a {input.gtf} \
-        -o {output} \
-        -p --countReadPairs \
-        {input.bam}
-        """
 
 
 
