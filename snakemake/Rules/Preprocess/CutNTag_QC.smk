@@ -187,6 +187,7 @@ rule Bamtobw:
         f"{Workdir}/logs/bigwig/{{sample}}.log"
     shell:
         """
+		eval "$(micromamba shell hook --shell=bash)"
         micromamba activate DeepTools
         bamCoverage \
         -b {input.bam} \
@@ -210,6 +211,7 @@ rule Macs2_callpeak:
         f"{Workdir}/logs/macs2/all_samples.log"
     shell:
         """
+	    eval "$(micromamba shell hook --shell=bash)"
         micromamba activate MACS
         macs2 callpeak \
         -t {input.bam} \
@@ -305,6 +307,7 @@ rule plotPCA:
             --labels {params.labels} \
             2> {log}
         """
+
 
 
 
