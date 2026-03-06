@@ -182,8 +182,7 @@ rule macs2_callpeak:
     input:
         bam=expand(f"{Workdir}/alignment/star/{sample}.star.filter.sort.bam")
     output:
-        narrowpeak=f"results/macs2/{sample}_peaks.narrowPeak",
-        xls="results/macs2/{sample}_peaks.xls"
+
     params:
         name="{sample}",
         genome="hs"
@@ -199,12 +198,66 @@ rule macs2_callpeak:
         --outdir results/macs2
         """
 
+# ============================================================
+# Deeptools MultiBamSummary
+# ============================================================
+rule multiBamSummary:
+    input:
+        bams=expand(f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam", sample=SAMPLES),
+        bed=f"{Workdir}/macs2/all_samples.bed"
+    output:
+        npz=f"{Workdir}/deeptools/multiBamSummary/multibamsummary_peaks.npz",
+        raw=f"{Workdir}/deeptools/multiBamSummary/multibamsummary_peaks.tab"
+    log:
+        f"{Workdir}/logs/deeptools/multiBamSummary_peaks.log"
+    threads: 4
+    resources:
+        mem_mb=16000,
+        runtime="4h"
+    shell:
+        """
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate deeptools
 
+        multiBamSummary BED-file \
+            --BED {input.bed} \
+            -b {input.bams} \
+            -o {output.npz} \
+            --outRawCounts {output.raw} \
+            -p {threads} \
+            2> {log}
+        """
 
+# ============================================================
+# Deeptools plotPCA
+# ============================================================
+rule plotPCA:
+    input:
+        summary=f"{Workdir}/deeptools/multiBamSummary/multibamsummary_peaks.npz",
+        bams=expand(f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam", sample=SAMPLES)
+    output:
+        pdf=f"{Workdir}/deeptools/PCA/PCA_peaks.pdf",
+        tab=f"{Workdir}/deeptools/PCA/PCA_peaks.tab"
+    log:
+        f"{Workdir}/logs/deeptools/plotPCA.log"
+    threads: 2
+    resources:
+        mem_mb=8000,
+        runtime="2h"
+    params:
+        labels=" ".join(SAMPLES)
+    shell:
+        """
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate deeptools
 
-
-
-
-
+        plotPCA \
+            -in {input.summary} \
+            -o {output.pdf} \
+            --outFileNameData {output.tab} \
+            -T "PCA of BAM samples (peaks)" \
+            --labels {params.labels} \
+            2> {log}
+        """
 
 
