@@ -182,7 +182,9 @@ rule bamtobw:
     input:
         bam=f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam"
     output:
-        bw=f"{Workdir}/results/bigwig/{{sample}}.bw"
+        bw=f"{Workdir}/bigwig/{{sample}}.bw"
+    log:
+        f"{Workdir}/logs/bigwig/bamtobw.log"
     shell:
         """
 	    micromamba activate DeepTools
@@ -203,6 +205,8 @@ rule macs2_callpeak:
         bed=f"{Workdir}/macs2/all_samples.bed"
     params:
         genome="hs"
+    log:
+        f"{Workdir}/logs/macs2/macs2_callpeak.log"
     shell:
         """
         micromamba activate MACS
@@ -300,6 +304,7 @@ rule plotPCA:
             --labels {params.labels} \
             2> {log}
         """
+
 
 
 
