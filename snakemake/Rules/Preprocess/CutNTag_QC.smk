@@ -175,7 +175,29 @@ rule Sort_Bam:
         samtools index -b {output.star} 2>> {log}
         """
 
-
+# ============================================================
+# MACS2
+# ============================================================
+rule macs2_callpeak:
+    input:
+        bam="results/alignment/sorted/{sample}.sorted.bam"
+    output:
+        narrowpeak="results/macs2/{sample}_peaks.narrowPeak",
+        xls="results/macs2/{sample}_peaks.xls"
+    params:
+        name="{sample}",
+        genome="hs"
+    conda:
+        "envs/macs2.yaml"
+    shell:
+        """
+        macs2 callpeak \
+        -t {input.bam} \
+        -f BAMPE \
+        -g {params.genome} \
+        -n {params.name} \
+        --outdir results/macs2
+        """
 
 
 
