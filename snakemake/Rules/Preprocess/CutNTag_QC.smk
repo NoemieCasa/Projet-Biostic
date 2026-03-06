@@ -184,15 +184,16 @@ rule Bamtobw:
     output:
         bw=f"{Workdir}/bigwig/{{sample}}.bw"
     log:
-        f"{Workdir}/logs/bigwig/bamtobw.log"
+        f"{Workdir}/logs/bigwig/{{sample}}.log"
     shell:
         """
-	    micromamba activate DeepTools
+        micromamba activate DeepTools
         bamCoverage \
         -b {input.bam} \
         -o {output.bw} \
         --normalizeUsing CPM \
-        --binSize 10
+        --binSize 10 \
+        > {log} 2>&1
         """
 
 # ============================================================
@@ -200,13 +201,13 @@ rule Bamtobw:
 # ============================================================
 rule Macs2_callpeak:
     input:
-        bam=expand(f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam", sample=SAMPLES)
+        bam=f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam"
     output:
-        bed=f"{Workdir}/macs2/all_samples.bed"
+        bed=f"{Workdir}/macs2/{{sample}}_peaks.narrowPeak"
     params:
         genome="hs"
     log:
-        f"{Workdir}/logs/macs2/macs2_callpeak.log"
+        f"{Workdir}/logs/macs2/{{sample}}.log"
     shell:
         """
         micromamba activate MACS
@@ -214,10 +215,10 @@ rule Macs2_callpeak:
         -t {input.bam} \
         -f BAMPE \
         -g {params.genome} \
-        -n all_samples \
-        --outdir {Workdir}/macs2
+        -n {wildcards.sample} \
+        --outdir {Workdir}/macs2 \
+        > {log} 2>&1
         """
-
 
 # ============================================================
 # Compute Matrix
@@ -304,6 +305,7 @@ rule plotPCA:
             --labels {params.labels} \
             2> {log}
         """
+
 
 
 
