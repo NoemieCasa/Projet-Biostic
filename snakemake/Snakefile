@@ -73,6 +73,10 @@ rule all:
         
         # Stats d'alignement
         expand(f"{Workdir}/samstats/star/{{sample}}.star.stats", sample=SAMPLES)
+
+        # bed et bigwig
+        expand(f"{Workdir}/bigwig/{{sample}}.bw", sample=SAMPLES),
+        f"{Workdir}/macs2/all_samples.bed"
 ##################
 ###import rules###
 ##################
