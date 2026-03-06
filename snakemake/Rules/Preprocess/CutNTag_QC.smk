@@ -201,9 +201,9 @@ rule Bamtobw:
 # ============================================================
 rule Macs2_callpeak:
     input:
-        bam=f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam"
+        bam=expand(f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam", sample=SAMPLES)
     output:
-        bed=f"{Workdir}/macs2/{{sample}}_peaks.narrowPeak"
+        bed=f"{Workdir}/macs2/all_samples.bed"
     params:
         genome="hs"
     log:
@@ -305,6 +305,7 @@ rule plotPCA:
             --labels {params.labels} \
             2> {log}
         """
+
 
 
 
