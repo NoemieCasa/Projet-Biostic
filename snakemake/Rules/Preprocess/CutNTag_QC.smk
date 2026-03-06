@@ -203,11 +203,11 @@ rule Macs2_callpeak:
     input:
         bam=expand(f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam", sample=SAMPLES)
     output:
-        bed=f"{Workdir}/macs2/all_samples.bed"
+        narrowpeak=f"{Workdir}/macs2/all_samples_peaks.narrowPeak"
     params:
         genome="hs"
     log:
-        f"{Workdir}/logs/macs2/{{sample}}.log"
+        f"{Workdir}/logs/macs2/all_samples.log"
     shell:
         """
         micromamba activate MACS
@@ -215,7 +215,7 @@ rule Macs2_callpeak:
         -t {input.bam} \
         -f BAMPE \
         -g {params.genome} \
-        -n {wildcards.sample} \
+        -n all_samples \
         --outdir {Workdir}/macs2 \
         > {log} 2>&1
         """
@@ -305,6 +305,7 @@ rule plotPCA:
             --labels {params.labels} \
             2> {log}
         """
+
 
 
 
