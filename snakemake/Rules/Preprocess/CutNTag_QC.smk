@@ -176,27 +176,68 @@ rule Sort_Bam:
         """
 
 # ============================================================
+# fichier bam vers fichier bigwig 
+# ============================================================
+rule bamtobw:
+    input:
+        bam=f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam"
+    output:
+        bw=f"{Workdir}/results/bigwig/{{sample}}.bw"
+    shell:
+        """
+	    micromamba activate DeepTools
+        bamCoverage \
+        -b {input.bam} \
+        -o {output.bw} \
+        --normalizeUsing CPM \
+        --binSize 10
+        """
+
+# ============================================================
 # MACS2
 # ============================================================
 rule macs2_callpeak:
     input:
-        bam=expand(f"{Workdir}/alignment/star/{sample}.star.filter.sort.bam")
+        bam=expand(f"{Workdir}/alignment/star/{sample}.star.filter.sort.bam", sample=SAMPLES)
     output:
-
+	bed=f"{Workdir}/macs2/all_samples.bed"
     params:
-        name="{sample}",
         genome="hs"
-    conda:
-        "envs/macs2.yaml"
     shell:
         """
+	micromamba activate MACS
         macs2 callpeak \
         -t {input.bam} \
         -f BAMPE \
         -g {params.genome} \
-        -n {params.name} \
-        --outdir results/macs2
+        -n all_samples \
+        --outdir f"{Workdir}/macs2"
         """
+
+
+# ============================================================
+# Compute Matrix
+# ============================================================
+rule compute_matrix:
+    input:
+        bw=expand(f"{Workdir}/bigwig/{{sample}}.bw", sample=SAMPLES),
+        bed=f"{Workdir}/macs2/all_samples.bed"
+    output:
+        matrix=f"{Workdir}/deeptools/matrix_peaks.gz"
+    shell:
+        """
+	micromamba activate DeepTools
+        computeMatrix reference-point \
+        -S {input.bw} \
+        -R {input.bed} \
+        -a 3000 \
+        -b 3000 \
+        -o {output.matrix}
+        """
+
+# ============================================================
+# HeatMap
+# ============================================================
 
 # ============================================================
 # Deeptools MultiBamSummary
@@ -259,5 +300,6 @@ rule plotPCA:
             --labels {params.labels} \
             2> {log}
         """
+
 
 
