@@ -178,7 +178,7 @@ rule Sort_Bam:
 # ============================================================
 # fichier bam vers fichier bigwig 
 # ============================================================
-rule bamtobw:
+rule Bamtobw:
     input:
         bam=f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam"
     output:
@@ -198,7 +198,7 @@ rule bamtobw:
 # ============================================================
 # MACS2
 # ============================================================
-rule macs2_callpeak:
+rule Macs2_callpeak:
     input:
         bam=expand(f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam", sample=SAMPLES)
     output:
@@ -222,7 +222,7 @@ rule macs2_callpeak:
 # ============================================================
 # Compute Matrix
 # ============================================================
-rule compute_matrix:
+rule Compute_matrix:
     input:
         bw=expand(f"{Workdir}/bigwig/{{sample}}.bw", sample=SAMPLES),
         bed=f"{Workdir}/macs2/all_samples.bed"
@@ -304,6 +304,7 @@ rule plotPCA:
             --labels {params.labels} \
             2> {log}
         """
+
 
 
 
