@@ -243,9 +243,23 @@ rule Compute_matrix:
         """
 
 # ============================================================
-# HeatMap
+# Plot Heatmap
 # ============================================================
-
+rule plot_heatmap:
+    input:
+        matrix=f"{Workdir}/deeptools/matrix_peaks.gz"
+    output:
+        heatmap=f"{Workdir}/deeptools/heatmap_peaks.png"
+    shell:
+        """
+        micromamba activate DeepTools
+        plotHeatmap \
+        -m {input.matrix} \
+        -out {output.heatmap} \
+        --colorMap RdBu \
+        --whatToShow 'heatmap and colorbar' \
+        --plotTitle "Intensité des signaux autour des peaks"
+        """
 # ============================================================
 # Deeptools MultiBamSummary
 # ============================================================
@@ -309,6 +323,36 @@ rule plotPCA:
         """
 
 
+##################
+###MultiQC ###
+##################
+rule MultiQC:
+	input:
+		expand([f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html",
+				f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R2_001_fastqc.html",
+				f"{Workdir}/FastQC/fastqc_trimmed/{{sample}}/{{sample}}_R1_001_paired_fastqc.html",
+				f"{Workdir}/FastQC/fastqc_trimmed/{{sample}}/{{sample}}_R2_001_paired_fastqc.html",
+				f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam",
+				f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam",
+				f"{Workdir}/deeptools/heatmap_peaks.png"], sample=SAMPLES)
+	output:
+		f"{Workdir}/multiQC/multiqc_report.html"
+	params:
+		dir1=f"{Workdir}/FastQC/fastqc_raw/",
+		dir2=f"{Workdir}/FastQC/fastqc_trimmed/",
+		dir3=f"{Workdir}/alignment/star/",
+		dir4=f"{Workdir}/deeptools/",
+		outdir=f"{Workdir}/multiQC/"
+	log:
+		f"{Workdir}/logs/multiQC/err_multiQC.txt"
+	shell:
+		"""
+		micromamba activate multiQC
+		multiqc --config {Snakedir}/MultiQC_config/multiqc_config.yaml \
+			--interactive \
+			--outdir {params.outdir} \
+			{params.dir1} {params.dir2} {params.dir3} {params.dir4} 2> {log}
+		"""
 
 
 
