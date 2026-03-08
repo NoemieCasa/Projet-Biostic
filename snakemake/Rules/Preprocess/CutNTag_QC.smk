@@ -322,10 +322,9 @@ rule plotPCA:
             2> {log}
         """
 
-
-##################
-###MultiQC ###
-##################
+# ============================================================
+# MultiQC
+# ============================================================
 rule MultiQC:
 	input:
 		expand([f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html",
@@ -354,6 +353,37 @@ rule MultiQC:
 			{params.dir1} {params.dir2} {params.dir3} {params.dir4} 2> {log}
 		"""
 
+# ============================================================
+# Deeptools plotProfile
+# ============================================================
+rule plotProfile:
+    input:
+        matrix=f"{Workdir}/deeptools/matrix_peaks.gz"
+    output:
+        pdf=f"{Workdir}/deeptools/plotProfile/plotProfile_peaks.pdf",
+        tab=f"{Workdir}/deeptools/plotProfile/plotProfile_peaks.tab"
+    log:
+        f"{Workdir}/logs/deeptools/plotProfile.log"
+    threads: 2
+    resources:
+        mem_mb=8000,
+        runtime="2h"
+    params:
+        labels=" ".join(SAMPLES)
+    shell:
+        """
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate DeepTools
+
+        plotProfile \
+            -m {input.matrix} \
+            -out {output.pdf} \
+            --outFileNameData {output.tab} \
+            --samplesLabel {params.labels} \
+            -T "Average signal around peaks" \
+            --perGroup \
+            2> {log}
+        """
 
 
 
