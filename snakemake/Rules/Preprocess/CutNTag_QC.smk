@@ -399,6 +399,33 @@ rule PlotProfile:
             2> {log}
         """
 
+# ============================================================
+# Annotation des peaks avec Homer
+# ============================================================
+rule Homer_annotate_peaks:
+    input:
+        narrowpeak=f"{Workdir}/macs2/all_samples_peaks.narrowPeak"
+    output:
+        annotation=f"{Workdir}/homer/peaks_annotation.txt"
+    log:
+        f"{Workdir}/logs/homer/annotate_peaks.log"
+    threads: 2
+    resources:
+        mem_mb=8000,
+        runtime="2h"
+    params:
+        genome="hg38"
+    shell:
+        """
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate homer
+
+        annotatePeaks.pl \
+            {input.narrowpeak} \
+            {params.genome} \
+            > {output.annotation} \
+            2> {log}
+        """
 
 
 
