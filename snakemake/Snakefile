@@ -80,7 +80,7 @@ rule all:
 
         # nouvelles étapes deeptools
         f"{Workdir}/deeptools/matrix_peaks.gz",
-        f"{Workdir}/deeptools/heatmap_peaks.png"
+        f"{Workdir}/deeptools/heatmap_peaks.png",
 
         # Deeptools MultiBamSummary
         f"{Workdir}/deeptools/multiBamSummary/multibamsummary_peaks.npz",
