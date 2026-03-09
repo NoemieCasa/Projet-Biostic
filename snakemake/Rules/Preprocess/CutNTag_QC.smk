@@ -280,7 +280,7 @@ rule Plot_heatmap:
 rule MultiBamSummary:
     input:
         bams=expand(f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam", sample=SAMPLES),
-        bed=f"{Workdir}/macs2/all_samples.bed"
+		narrowpeak=f"{Workdir}/macs2/all_samples_peaks.narrowPeak"
     output:
         npz=f"{Workdir}/deeptools/multiBamSummary/multibamsummary_peaks.npz",
         raw=f"{Workdir}/deeptools/multiBamSummary/multibamsummary_peaks.tab"
@@ -426,6 +426,7 @@ rule Homer_annotate_peaks:
             > {output.annotation} \
             2> {log}
         """
+
 
 
 
