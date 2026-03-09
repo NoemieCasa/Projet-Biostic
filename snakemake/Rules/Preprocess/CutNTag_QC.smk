@@ -245,7 +245,7 @@ rule Compute_matrix:
 # ============================================================
 # Plot Heatmap
 # ============================================================
-rule plot_heatmap:
+rule Plot_heatmap:
     input:
         matrix=f"{Workdir}/deeptools/matrix_peaks.gz"
     output:
@@ -263,7 +263,7 @@ rule plot_heatmap:
 # ============================================================
 # Deeptools MultiBamSummary
 # ============================================================
-rule multiBamSummary:
+rule MultiBamSummary:
     input:
         bams=expand(f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam", sample=SAMPLES),
         bed=f"{Workdir}/macs2/all_samples.bed"
@@ -293,7 +293,7 @@ rule multiBamSummary:
 # ============================================================
 # Deeptools plotPCA
 # ============================================================
-rule plotPCA:
+rule PlotPCA:
     input:
         summary=f"{Workdir}/deeptools/multiBamSummary/multibamsummary_peaks.npz",
         bams=expand(f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam", sample=SAMPLES)
@@ -356,7 +356,7 @@ rule MultiQC:
 # ============================================================
 # Deeptools plotProfile
 # ============================================================
-rule plotProfile:
+rule PlotProfile:
     input:
         matrix=f"{Workdir}/deeptools/matrix_peaks.gz"
     output:
@@ -384,6 +384,7 @@ rule plotProfile:
             --perGroup \
             2> {log}
         """
+
 
 
 
