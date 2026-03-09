@@ -5,7 +5,7 @@ printshellcmds: True
 rerun-incomplete: True
 keep-going: True
 
-until: MACS2
+until: Plot_heatmap
 notemp: True
 jobs: 25
 executor: slurm
