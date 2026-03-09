@@ -77,6 +77,10 @@ rule all:
         # bed et bigwig
         expand(f"{Workdir}/bigwig/{{sample}}.bw", sample=SAMPLES),
         f"{Workdir}/macs2/all_samples_peaks.narrowPeak"
+
+        # nouvelles étapes deeptools
+        f"{Workdir}/deeptools/matrix_peaks.gz",
+        f"{Workdir}/deeptools/heatmap_peaks.png"
 ##################
 ###import rules###
 ##################
