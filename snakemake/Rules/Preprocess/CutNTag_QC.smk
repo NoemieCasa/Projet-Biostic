@@ -243,7 +243,6 @@ rule Compute_matrix:
         """
         eval "$(micromamba shell hook --shell=bash)"
         micromamba activate DeepTools
-
         computeMatrix reference-point \
             -S {input.bw} \
             -R {input.narrowpeak} \
@@ -293,7 +292,7 @@ rule MultiBamSummary:
     shell:
         """
         eval "$(micromamba shell hook --shell=bash)"
-        micromamba activate deeptools
+        micromamba activate DeepTools
 
         multiBamSummary BED-file \
             --BED {input.narrowpeak} \
@@ -324,7 +323,7 @@ rule PlotPCA:
     shell:
         """
         eval "$(micromamba shell hook --shell=bash)"
-        micromamba activate deeptools
+        micromamba activate DeepTools
 
         plotPCA \
             -in {input.summary} \
@@ -425,6 +424,7 @@ rule Homer_annotate_peaks:
             > {output.annotation} \
             2> {log}
         """
+
 
 
 
