@@ -369,32 +369,51 @@ rule PlotProfile:
 # MultiQC
 # ============================================================
 rule MultiQC:
-	input:
-		expand([f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html",
-				f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R2_001_fastqc.html",
-				f"{Workdir}/FastQC/fastqc_trimmed/{{sample}}/{{sample}}_R1_001_paired_fastqc.html",
-				f"{Workdir}/FastQC/fastqc_trimmed/{{sample}}/{{sample}}_R2_001_paired_fastqc.html",
-				f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam",
-				f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam",
-				f"{Workdir}/deeptools/heatmap_peaks.png"], sample=SAMPLES)
-	output:
-		f"{Workdir}/multiQC/multiqc_report.html"
-	params:
-		dir1=f"{Workdir}/FastQC/fastqc_raw/",
-		dir2=f"{Workdir}/FastQC/fastqc_trimmed/",
-		dir3=f"{Workdir}/alignment/star/",
-		dir4=f"{Workdir}/deeptools/",
-		outdir=f"{Workdir}/multiQC/"
-	log:
-		f"{Workdir}/logs/multiQC/err_multiQC.txt"
-	shell:
-		"""
-		micromamba activate multiQC
-		multiqc --config {Snakedir}/MultiQC_config/multiqc_config.yaml \
-			--interactive \
-			--outdir {params.outdir} \
-			{params.dir1} {params.dir2} {params.dir3} {params.dir4} 2> {log}
-		"""
+    input:
+        expand([
+            # FastQC raw
+            f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R1_001_fastqc.html",
+            f"{Workdir}/FastQC/fastqc_raw/{{sample}}/{{sample}}_R2_001_fastqc.html",
+            # FastQC trimmed
+            f"{Workdir}/FastQC/fastqc_trimmed/{{sample}}/{{sample}}_R1_001_paired_fastqc.html",
+            f"{Workdir}/FastQC/fastqc_trimmed/{{sample}}/{{sample}}_R2_001_paired_fastqc.html",
+            # STAR alignment
+            f"{Workdir}/alignment/star/{{sample}}.starAligned.sortedByCoord.out.bam",
+            f"{Workdir}/alignment/star/{{sample}}.star.filter.sort.bam",
+            # Deeptools outputs
+            f"{Workdir}/deeptools/matrix_peaks.gz",
+            f"{Workdir}/deeptools/multiBamSummary/multibamsummary_peaks.npz",
+            f"{Workdir}/deeptools/multiBamSummary/multibamsummary_peaks.tab",
+            f"{Workdir}/deeptools/PCA/PCA_peaks.pdf",
+            f"{Workdir}/deeptools/PCA/PCA_peaks.tab",
+            f"{Workdir}/deeptools/plotProfile/plotProfile_peaks.pdf",
+            f"{Workdir}/deeptools/plotProfile/plotProfile_peaks.tab",
+            f"{Workdir}/deeptools/heatmap_peaks.png",
+            # MACS2 peaks
+            f"{Workdir}/macs2/all_samples_peaks.narrowPeak",
+            f"{Workdir}/macs2/all_samples.bed"
+        ], sample=SAMPLES)
+    output:
+        f"{Workdir}/multiQC/multiqc_report.html"
+    params:
+        dirs=[
+            f"{Workdir}/FastQC/fastqc_raw/",
+            f"{Workdir}/FastQC/fastqc_trimmed/",
+            f"{Workdir}/alignment/star/",
+            f"{Workdir}/deeptools/",
+            f"{Workdir}/macs2/"
+        ],
+        outdir=f"{Workdir}/multiQC/"
+    log:
+        f"{Workdir}/logs/multiQC/err_multiQC.txt"
+    shell:
+        """
+        micromamba activate multiQC
+        multiqc --config {Snakedir}/MultiQC_config/multiqc_config.yaml \
+            --interactive \
+            --outdir {params.outdir} \
+            {' '.join(params.dirs)} 2> {log}
+        """
 
 
 # ============================================================
@@ -424,6 +443,7 @@ rule Homer_annotate_peaks:
             > {output.annotation} \
             2> {log}
         """
+
 
 
 
