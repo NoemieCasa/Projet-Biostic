@@ -176,7 +176,7 @@ rule Sort_Bam:
         """
 
 # ============================================================
-# fichier bam vers fichier bigwig 
+# Fichier bam vers fichier bigwig 
 # ============================================================
 rule Bamtobw:
     input:
@@ -228,18 +228,32 @@ rule Macs2_callpeak:
 rule Compute_matrix:
     input:
         bw=expand(f"{Workdir}/bigwig/{{sample}}.bw", sample=SAMPLES),
-        bed=f"{Workdir}/macs2/all_samples.bed"
+        narrowpeak=f"{Workdir}/macs2/all_samples_peaks.narrowPeak"
     output:
         matrix=f"{Workdir}/deeptools/matrix_peaks.gz"
+    log:
+        f"{Workdir}/logs/deeptools/computeMatrix.log"
+    threads: 4
+    resources:
+        mem_mb=16000,
+        runtime="4h"
+    params:
+        labels=" ".join(SAMPLES)
     shell:
         """
-	micromamba activate DeepTools
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate DeepTools
+
         computeMatrix reference-point \
-        -S {input.bw} \
-        -R {input.bed} \
-        -a 3000 \
-        -b 3000 \
-        -o {output.matrix}
+            -S {input.bw} \
+            -R {input.narrowpeak} \
+            --referencePoint center \
+            -b 3000 \
+            -a 3000 \
+            --skipZeros \
+            -p {threads} \
+            -o {output.matrix} \
+            2> {log}
         """
 
 # ============================================================
@@ -384,6 +398,7 @@ rule PlotProfile:
             --perGroup \
             2> {log}
         """
+
 
 
 
