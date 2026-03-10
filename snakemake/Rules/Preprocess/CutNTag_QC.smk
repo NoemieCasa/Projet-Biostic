@@ -424,33 +424,33 @@ rule Homer_annotate_peaks:
         annotation=f"{Workdir}/homer/peaks_annotation.txt"
     log:
         f"{Workdir}/logs/homer/annotate_peaks.log"
-    threads: 2
-    resources:
-        mem_mb=8000,
-        runtime="2h"
     params:
         genome="hg38",
-        homer_bin="~/micromamba/envs/homer_env/bin"
+        # On définit un chemin "virtuel" sans arobase
+        fake_home="/tmp/iguerin_homer"
     shell:
         """
         eval "$(micromamba shell hook --shell=bash)"
         micromamba activate homer_env
 
-        # 1. On ajoute explicitement le dossier bin de HOMER au PERL5LIB
-        # On utilise des guillemets pour protéger le @ dans ton chemin
-        export PERL5LIB="{params.homer_bin}:$PERL5LIB"
-        
-        # 2. On s'assure que le PATH est aussi correct
-        export PATH="{params.homer_bin}:$PATH"
+        # 1. On crée un lien symbolique propre vers ton environnement
+        # Cela permet d'accéder à l'env via un chemin que Perl ne cassera pas
+        rm -rf {params.fake_home}
+        ln -s /home/iguerin2024@ec-nantes.fr/micromamba/envs/homer_env {params.fake_home}
 
-        annotatePeaks.pl \
+        # 2. On configure les variables avec ce chemin 'propre'
+        export PATH="{params.fake_home}/bin:$PATH"
+        export PERL5LIB="{params.fake_home}/bin:$PERL5LIB"
+
+        # 3. On lance la commande en utilisant le chemin du lien symbolique
+        {params.fake_home}/bin/annotatePeaks.pl \
             {input.narrowpeak} \
             {params.genome} \
-            > {output.annotation} \
-            2> {log}
+            > {output.annotation} 2> {log}
+
+        # Nettoyage du lien
+        rm -f {params.fake_home}
         """
-
-
 
 
 
