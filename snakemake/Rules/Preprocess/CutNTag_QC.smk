@@ -395,13 +395,7 @@ rule MultiQC:
     output:
         f"{Workdir}/multiQC/multiqc_report.html"
     params:
-        dirs=[
-            f"{Workdir}/FastQC/fastqc_raw/",
-            f"{Workdir}/FastQC/fastqc_trimmed/",
-            f"{Workdir}/alignment/star/",
-            f"{Workdir}/deeptools/",
-            f"{Workdir}/macs2/"
-        ],
+        dirs=f"{Workdir}/FastQC/fastqc_raw/ {Workdir}/FastQC/fastqc_trimmed/ {Workdir}/alignment/star/ {Workdir}/deeptools/ {Workdir}/macs2/",
         outdir=f"{Workdir}/multiQC/"
     log:
         f"{Workdir}/logs/multiQC/err_multiQC.txt"
@@ -442,6 +436,7 @@ rule Homer_annotate_peaks:
             > {output.annotation} \
             2> {log}
         """
+
 
 
 
