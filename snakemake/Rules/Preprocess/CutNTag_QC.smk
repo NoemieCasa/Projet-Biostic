@@ -426,11 +426,14 @@ rule Homer_annotate_peaks:
         mem_mb=8000,
         runtime="2h"
     params:
-        genome="hg38"
+        genome="hg38",
+        homer_home="~/micromamba/envs/homer_env/share/homer"
     shell:
         """
         eval "$(micromamba shell hook --shell=bash)"
         micromamba activate homer_env
+
+        export HOMER_HOME={params.homer_home}
 
         annotatePeaks.pl \
             {input.narrowpeak} \
