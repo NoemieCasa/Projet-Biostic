@@ -414,6 +414,9 @@ rule MultiQC:
 # ============================================================
 # Annotation des peaks avec Homer
 # ============================================================
+# ============================================================
+# Annotation des peaks avec Homer
+# ============================================================
 rule Homer_annotate_peaks:
     input:
         narrowpeak=f"{Workdir}/macs2/all_samples_peaks.narrowPeak"
@@ -427,13 +430,18 @@ rule Homer_annotate_peaks:
         runtime="2h"
     params:
         genome="hg38",
-        homer_home="~/micromamba/envs/homer_env/share/homer"
+        homer_bin="~/micromamba/envs/homer_env/bin"
     shell:
         """
         eval "$(micromamba shell hook --shell=bash)"
         micromamba activate homer_env
 
-        export HOMER_HOME={params.homer_home}
+        # 1. On ajoute explicitement le dossier bin de HOMER au PERL5LIB
+        # On utilise des guillemets pour protéger le @ dans ton chemin
+        export PERL5LIB="{params.homer_bin}:$PERL5LIB"
+        
+        # 2. On s'assure que le PATH est aussi correct
+        export PATH="{params.homer_bin}:$PATH"
 
         annotatePeaks.pl \
             {input.narrowpeak} \
