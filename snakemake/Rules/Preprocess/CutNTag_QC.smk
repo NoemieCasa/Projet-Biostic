@@ -435,7 +435,7 @@ rule Homer_annotate_peaks:
     shell:
         """
         eval "$(micromamba shell hook --shell=bash)"
-        micromamba activate homer
+        micromamba activate homer_env
 
         annotatePeaks.pl \
             {input.narrowpeak} \
@@ -443,6 +443,7 @@ rule Homer_annotate_peaks:
             > {output.annotation} \
             2> {log}
         """
+
 
 
 
