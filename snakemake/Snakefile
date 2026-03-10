@@ -100,6 +100,10 @@ rule all:
         # MultiQC
         f"{Workdir}/multiQC/multiqc_report.html"
 
+        # HOMER ET HEATMAP ANNOTÉE
+        f"{Workdir}/deeptools/heatmap_annotated.png",  # Sortie de la heatmap groupée
+        f"{Workdir}/homer/split_bed/promoters.bed"      # Un des fichiers split
+
 ##################
 ###import rules###
 ##################
