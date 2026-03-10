@@ -414,9 +414,6 @@ rule MultiQC:
 # ============================================================
 # Annotation des peaks avec Homer
 # ============================================================
-# ============================================================
-# Annotation des peaks avec Homer
-# ============================================================
 rule Homer_annotate_peaks:
     input:
         narrowpeak=f"{Workdir}/macs2/all_samples_peaks.narrowPeak"
@@ -426,30 +423,41 @@ rule Homer_annotate_peaks:
         f"{Workdir}/logs/homer/annotate_peaks.log"
     params:
         genome="hg38",
-        # On définit un chemin "virtuel" sans arobase
-        fake_home="/tmp/iguerin_homer"
+        # On définit un dossier de travail temporaire SANS arobase
+        # /tmp/ est souvent sûr, mais tu peux utiliser un dossier dans ton scratch s'il n'y a pas d'arobase
+        homer_workdir="/tmp/homer_exec_{sample}" 
     shell:
         """
         eval "$(micromamba shell hook --shell=bash)"
         micromamba activate homer_env
 
-        # 1. On crée un lien symbolique propre vers ton environnement
-        # Cela permet d'accéder à l'env via un chemin que Perl ne cassera pas
-        rm -rf {params.fake_home}
-        ln -s /home/iguerin2024@ec-nantes.fr/micromamba/envs/homer_env {params.fake_home}
+        # 1. On crée un dossier de travail propre
+        mkdir -p {params.homer_workdir}
+        
+        # 2. On FORCE HOMER à croire qu'il est installé là où il n'y a pas d'arobase
+        # On crée des liens vers les dossiers critiques de l'env
+        ln -sfn /home/iguerin2024@ec-nantes.fr/micromamba/envs/homer_env/bin {params.homer_workdir}/bin
+        ln -sfn /home/iguerin2024@ec-nantes.fr/micromamba/envs/homer_env/share/homer {params.homer_workdir}/share
 
-        # 2. On configure les variables avec ce chemin 'propre'
-        export PATH="{params.fake_home}/bin:$PATH"
-        export PERL5LIB="{params.fake_home}/bin:$PERL5LIB"
+        # 3. ON EXPORTE LES VARIABLES EN UTILISANT CE CHEMIN PROPRE
+        export PATH="{params.homer_workdir}/bin:$PATH"
+        export PERL5LIB="{params.homer_workdir}/bin:$PERL5LIB"
+        
+        # L'astuce cruciale pour HOMER :
+        export HOMER_HOME="{params.homer_workdir}/share"
 
-        # 3. On lance la commande en utilisant le chemin du lien symbolique
-        {params.fake_home}/bin/annotatePeaks.pl \
+        # 4. On lance l'exécution
+        # On se place dans le dossier sans arobase pour l'exécution
+        cd {params.homer_workdir}
+        
+        ./bin/annotatePeaks.pl \
             {input.narrowpeak} \
             {params.genome} \
-            > {output.annotation} 2> {log}
+            1> {output.annotation} 2> {log}
 
-        # Nettoyage du lien
-        rm -f {params.fake_home}
+        # Nettoyage
+        cd -
+        rm -rf {params.homer_workdir}
         """
 
 # ============================================================
@@ -513,6 +521,7 @@ rule Plot_heatmap_annotated:
             --regionsLabel "Promoteurs" "Autres" \
             --plotTitle "Signal CutNTag par type d'annotation"
         """
+
 
 
 
