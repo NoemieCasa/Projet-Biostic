@@ -98,7 +98,7 @@ rule all:
         f"{Workdir}/homer/peaks_annotation.txt",
 
         # MultiQC
-        f"{Workdir}/multiQC/multiqc_report.html"
+        f"{Workdir}/multiQC/multiqc_report.html",
 
         # HOMER ET HEATMAP ANNOTÉE
         f"{Workdir}/deeptools/heatmap_annotated.png",  # Sortie de la heatmap groupée
