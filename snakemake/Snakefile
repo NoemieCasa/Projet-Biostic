@@ -92,7 +92,14 @@ rule all:
 
         # Deeptools plotProfile
         f"{Workdir}/deeptools/plotProfile/plotProfile_peaks.pdf",
-        f"{Workdir}/deeptools/plotProfile/plotProfile_peaks.tab"
+        f"{Workdir}/deeptools/plotProfile/plotProfile_peaks.tab",
+
+        # Homer
+        f"{Workdir}/homer/peaks_annotation.txt",
+
+        # MultiQC
+        f"{Workdir}/multiQC/multiqc_report.html"
+
 ##################
 ###import rules###
 ##################
