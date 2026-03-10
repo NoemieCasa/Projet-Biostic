@@ -391,7 +391,6 @@ rule MultiQC:
             f"{Workdir}/deeptools/heatmap_peaks.png",
             # MACS2 peaks
             f"{Workdir}/macs2/all_samples_peaks.narrowPeak",
-            f"{Workdir}/macs2/all_samples.bed"
         ], sample=SAMPLES)
     output:
         f"{Workdir}/multiQC/multiqc_report.html"
@@ -443,6 +442,7 @@ rule Homer_annotate_peaks:
             > {output.annotation} \
             2> {log}
         """
+
 
 
 
