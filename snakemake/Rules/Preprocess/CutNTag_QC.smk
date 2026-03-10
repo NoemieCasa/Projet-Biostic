@@ -452,9 +452,67 @@ rule Homer_annotate_peaks:
         rm -f {params.fake_home}
         """
 
+# ============================================================
+# Extraction des catégories d'annotation pour Heatmap
+# ============================================================
+rule Split_annotations_to_bed:
+    input:
+        annotation=f"{Workdir}/homer/peaks_annotation.txt"
+    output:
+        tss=f"{Workdir}/homer/split_bed/promoters.bed",
+        distal=f"{Workdir}/homer/split_bed/distal_intergenic.bed"
+    shell:
+        """
+        # Extraire les promoteurs/TSS (colonne 8 dans HOMER contient l'annotation)
+        grep -i "promoter-tss" {input.annotation} | cut -f 2,3,4 > {output.tss} || touch {output.tss}
+        
+        # Extraire le reste (Intergenic et Intron)
+        grep -v "promoter-tss" {input.annotation} | grep -v "PeakID" | cut -f 2,3,4 > {output.distal} || touch {output.distal}
+        """
 
 
+# ============================================================
+# Matrix groupée par annotation
+# ============================================================
+rule Compute_matrix_annotated:
+    input:
+        bw=expand(f"{Workdir}/bigwig/{{sample}}.bw", sample=SAMPLES),
+        regions=[f"{Workdir}/homer/split_bed/promoters.bed", f"{Workdir}/homer/split_bed/distal_intergenic.bed"]
+    output:
+        matrix=f"{Workdir}/deeptools/matrix_annotated.gz"
+    threads: 4
+    shell:
+        """
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate DeepTools
+        computeMatrix reference-point \
+            -S {input.bw} \
+            -R {input.regions} \
+            --referencePoint center \
+            -b 3000 -a 3000 \
+            -o {output.matrix}
+        """
 
+# ============================================================
+# Heatmap annotée
+# ============================================================
+
+rule Plot_heatmap_annotated:
+    input:
+        matrix=f"{Workdir}/deeptools/matrix_annotated.gz"
+    output:
+        heatmap=f"{Workdir}/deeptools/heatmap_annotated.png"
+    shell:
+        """
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate DeepTools
+        plotHeatmap \
+            -m {input.matrix} \
+            -out {output.heatmap} \
+            --colorMap Viridis \
+            --regionsLabel "Promoteurs" "Autres" \
+            --plotTitle "Signal CutNTag par type d'annotation"
+        """
 
 
 
