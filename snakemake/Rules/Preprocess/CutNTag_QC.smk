@@ -459,6 +459,9 @@ rule Homer_annotate_peaks:
 # ============================================================
 # Extraction des catégories d'annotation pour Heatmap
 # ============================================================
+# ============================================================
+# Extraction propre des catégories d'annotation (BED pur)
+# ============================================================
 rule Split_annotations_to_bed:
     input:
         annotation=f"{Workdir}/homer/peaks_annotation.txt"
@@ -467,13 +470,22 @@ rule Split_annotations_to_bed:
         distal=f"{Workdir}/homer/split_bed/distal_intergenic.bed"
     shell:
         """
-        # Extraire les promoteurs/TSS (colonne 8 dans HOMER contient l'annotation)
-        grep -i "promoter-tss" {input.annotation} | cut -f 2,3,4 > {output.tss} || touch {output.tss}
-        
-        # Extraire le reste (Intergenic et Intron)
-        grep -v "promoter-tss" {input.annotation} | grep -v "PeakID" | cut -f 2,3,4 > {output.distal} || touch {output.distal}
-        """
+        mkdir -p $(dirname {output.tss})
 
+        # 1. Extraire les Promoteurs (TSS)
+        # On exclut l'en-tête (PeakID), on cherche 'promoter-TSS'
+        # On garde les colonnes 2, 3, 4 (Chr, Start, End) de HOMER
+        awk -F'\\t' '$8 ~ /promoter-TSS/ {{print $2"\\t"$3"\\t"$4}}' {input.annotation} > {output.tss}
+
+        # 2. Extraire le reste (Intergenic / Intron / etc.)
+        # On exclut l'en-tête ET le promoter-TSS
+        awk -F'\\t' '$1 !~ /PeakID/ && $8 !~ /promoter-TSS/ {{print $2"\\t"$3"\\t"$4}}' {input.annotation} > {output.distal}
+        
+        # Sécurité : Si un fichier est vide, deepTools va planter. 
+        # On vérifie et on ajoute une ligne bidon si besoin ou on s'assure qu'ils existent.
+        [ ! -s {output.tss} ] && echo "chr1\\t1\\t2" > {output.tss}
+        [ ! -s {output.distal} ] && echo "chr1\\t1\\t2" > {output.distal}
+        """
 
 # ============================================================
 # Matrix groupée par annotation
@@ -517,6 +529,7 @@ rule Plot_heatmap_annotated:
             --regionsLabel "Promoteurs" "Autres" \
             --plotTitle "Signal CutNTag par type d'annotation"
         """
+
 
 
 
