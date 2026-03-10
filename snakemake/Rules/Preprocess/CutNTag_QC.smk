@@ -468,27 +468,19 @@ rule Split_annotations_to_bed:
     output:
         tss=f"{Workdir}/homer/split_bed/promoters.bed",
         distal=f"{Workdir}/homer/split_bed/distal_intergenic.bed"
-    log:
-        f"{Workdir}/logs/homer/split_bed/annotation_to_bed.log"
     shell:
         """
-        mkdir -p $(dirname {output.tss})
-
-        # 1. Extraire les Promoteurs (TSS)
-        # On exclut l'en-tête (PeakID), on cherche 'promoter-TSS'
-        # On garde les colonnes 2, 3, 4 (Chr, Start, End) de HOMER
-        awk -F'\\t' '$8 ~ /promoter-TSS/ {{print $2"\\t"$3"\\t"$4}}' {input.annotation} > {output.tss}
-
-        # 2. Extraire le reste (Intergenic / Intron / etc.)
-        # On exclut l'en-tête ET le promoter-TSS
-        awk -F'\\t' '$1 !~ /PeakID/ && $8 !~ /promoter-TSS/ {{print $2"\\t"$3"\\t"$4}}' {input.annotation} > {output.distal}
+        # On utilise awk pour extraire proprement et s'assurer du formatage
+        # On saute la première ligne (NR>1) pour éviter l'en-tête de HOMER
         
-        # Sécurité : Si un fichier est vide, deepTools va planter. 
-        # On vérifie et on ajoute une ligne bidon si besoin ou on s'assure qu'ils existent.
-        [ ! -s {output.tss} ] && echo "chr1\\t1\\t2" > {output.tss}
-        [ ! -s {output.distal} ] && echo "chr1\\t1\\t2" > {output.distal}
-        """
+        awk -F'\\t' 'NR>1 && $8 ~ /[Pp]romoter/ {{print $2"\\t"$3"\\t"$4}}' {input.annotation} > {output.tss}
+        
+        awk -F'\\t' 'NR>1 && $8 !~ /[Pp]romoter/ {{print $2"\\t"$3"\\t"$4}}' {input.annotation} > {output.distal}
 
+        # Sécurité cruciale pour deepTools : un fichier BED ne peut pas être vide
+        if [ ! -s {output.tss} ]; then echo -e "chr1\\t0\\t1" > {output.tss}; fi
+        if [ ! -s {output.distal} ]; then echo -e "chr1\\t0\\t1" > {output.distal}; fi
+        """
 # ============================================================
 # Matrix groupée par annotation
 # ============================================================
@@ -505,12 +497,16 @@ rule Compute_matrix_annotated:
         """
         eval "$(micromamba shell hook --shell=bash)"
         micromamba activate DeepTools
+
         computeMatrix reference-point \
-            -S {input.bw} \
-            -R {input.regions} \
+            --scoreFileName {input.bw} \
+            --regionsFileName {input.regions} \
             --referencePoint center \
-            -b 3000 -a 3000 \
-            -o {output.matrix}
+            --beforeRegionStartLength 3000 \
+            --afterRegionStartLength 3000 \
+            --skipZeros \
+            -p {threads} \
+            -o {output.matrix} > {log} 2>&1
         """
 
 # ============================================================
@@ -535,6 +531,7 @@ rule Plot_heatmap_annotated:
             --regionsLabel "Promoteurs" "Autres" \
             --plotTitle "Signal CutNTag par type d'annotation"
         """
+
 
 
 
