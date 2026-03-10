@@ -468,6 +468,8 @@ rule Split_annotations_to_bed:
     output:
         tss=f"{Workdir}/homer/split_bed/promoters.bed",
         distal=f"{Workdir}/homer/split_bed/distal_intergenic.bed"
+    log:
+        f"{Workdir}/logs/homer/split_bed/annotation_to_bed.log"
     shell:
         """
         mkdir -p $(dirname {output.tss})
@@ -496,6 +498,8 @@ rule Compute_matrix_annotated:
         regions=[f"{Workdir}/homer/split_bed/promoters.bed", f"{Workdir}/homer/split_bed/distal_intergenic.bed"]
     output:
         matrix=f"{Workdir}/deeptools/matrix_annotated.gz"
+    log:
+        f"{Workdir}/logs/deeptools/matrix_annotated.log"
     threads: 4
     shell:
         """
@@ -518,6 +522,8 @@ rule Plot_heatmap_annotated:
         matrix=f"{Workdir}/deeptools/matrix_annotated.gz"
     output:
         heatmap=f"{Workdir}/deeptools/heatmap_annotated.png"
+    log:
+        f"{Workdir}/logs/deeptool/heatmap_annotated.log"
     shell:
         """
         eval "$(micromamba shell hook --shell=bash)"
@@ -529,6 +535,7 @@ rule Plot_heatmap_annotated:
             --regionsLabel "Promoteurs" "Autres" \
             --plotTitle "Signal CutNTag par type d'annotation"
         """
+
 
 
 
