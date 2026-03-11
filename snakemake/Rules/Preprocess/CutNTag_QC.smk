@@ -457,10 +457,7 @@ rule Homer_annotate_peaks:
         rm -rf {params.homer_workdir}
         """
 # ============================================================
-# Extraction des catégories d'annotation pour Heatmap
-# ============================================================
-# ============================================================
-# Extraction propre des catégories d'annotation (BED pur)
+# Extraction avec harmonisation des noms de chromosomes
 # ============================================================
 rule Split_annotations_to_bed:
     input:
@@ -470,16 +467,26 @@ rule Split_annotations_to_bed:
         distal=f"{Workdir}/homer/split_bed/distal_intergenic.bed"
     shell:
         """
-        # On utilise awk pour extraire proprement et s'assurer du formatage
-        # On saute la première ligne (NR>1) pour éviter l'en-tête de HOMER
+        # On extrait les colonnes 2,3,4 et on ajoute 'chr' si il manque
+        # On filtre sur la colonne 8 (Annotation)
         
-        awk -F'\\t' 'NR>1 && $8 ~ /[Pp]romoter/ {{print $2"\\t"$3"\\t"$4}}' {input.annotation} > {output.tss}
-        
-        awk -F'\\t' 'NR>1 && $8 !~ /[Pp]romoter/ {{print $2"\\t"$3"\\t"$4}}' {input.annotation} > {output.distal}
+        # Pour les Promoteurs
+        awk -F'\\t' 'BEGIN{{OFS="\\t"}} NR>1 && $8 ~ /[Pp]romoter/ {{ 
+            chrom=$2; 
+            if(chrom !~ /^chr/) chrom="chr"chrom; 
+            print chrom, $3, $4 
+        }}' {input.annotation} > {output.tss}
 
-        # Sécurité cruciale pour deepTools : un fichier BED ne peut pas être vide
-        if [ ! -s {output.tss} ]; then echo -e "chr1\\t0\\t1" > {output.tss}; fi
-        if [ ! -s {output.distal} ]; then echo -e "chr1\\t0\\t1" > {output.distal}; fi
+        # Pour le reste (Distal)
+        awk -F'\\t' 'BEGIN{{OFS="\\t"}} NR>1 && $8 !~ /[Pp]romoter/ {{ 
+            chrom=$2; 
+            if(chrom !~ /^chr/) chrom="chr"chrom; 
+            print chrom, $3, $4 
+        }}' {input.annotation} > {output.distal}
+
+        # VERIFICATION : Si les fichiers sont vides, on affiche un message d'erreur clair
+        if [ ! -s {output.tss} ]; then echo "ERREUR: Aucun promoteur trouvé dans l'annotation" >&2; fi
+        """
         """
 # ============================================================
 # Matrix groupée par annotation
@@ -531,6 +538,7 @@ rule Plot_heatmap_annotated:
             --regionsLabel "Promoteurs" "Autres" \
             --plotTitle "Signal CutNTag par type d'annotation"
         """
+
 
 
 
