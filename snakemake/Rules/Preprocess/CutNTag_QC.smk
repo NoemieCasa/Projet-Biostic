@@ -423,35 +423,20 @@ rule Homer_annotate_peaks:
         f"{Workdir}/logs/homer/annotate_peaks.log"
     params:
         genome="hg38",
-        # On enlève {sample} qui causait l'erreur
-        homer_workdir="/tmp/homer_iguerin_global" 
+        homer_home="~/scratch/homer"
     shell:
         """
         eval "$(micromamba shell hook --shell=bash)"
         micromamba activate homer_env
 
-        # 1. Nettoyage et création du dossier de travail
-        rm -rf {params.homer_workdir}
-        mkdir -p {params.homer_workdir}
-        
-        # 2. Liens symboliques vers l'environnement (sans @ dans le chemin)
-        ln -sfn /home/iguerin2024@ec-nantes.fr/micromamba/envs/homer_env/bin {params.homer_workdir}/bin
-        ln -sfn /home/iguerin2024@ec-nantes.fr/micromamba/envs/homer_env/share/homer {params.homer_workdir}/share
+        export HOMER_HOME={params.homer_home}
+        export PATH=$HOMER_HOME/bin:$PATH
 
-        # 3. Export des variables
-        export PATH="{params.homer_workdir}/bin:$PATH"
-        export PERL5LIB="{params.homer_workdir}/bin:$PERL5LIB"
-        export HOMER_HOME="{params.homer_workdir}/share"
-
-        # 4. Exécution
-        # On utilise le chemin relatif au bin pour tromper Perl
-        {params.homer_workdir}/bin/annotatePeaks.pl \
+        annotatePeaks.pl \
             {input.narrowpeak} \
             {params.genome} \
-            1> {output.annotation} 2> {log}
-
-        # Nettoyage final
-        rm -rf {params.homer_workdir}
+            > {output.annotation} \
+            2> {log}
         """
 # ============================================================
 # Extraction avec harmonisation des noms de chromosomes
@@ -464,7 +449,8 @@ rule Split_annotations_to_bed:
         distal=f"{Workdir}/homer/split_bed/distal_intergenic.bed"
     shell:
         """
-        # On extrait les colonnes 2,3,4 et on ajoute 'chr' si il manque
+		mkdir -p $(dirname {output.tss})
+    	# On extrait les colonnes 2,3,4 et on ajoute 'chr' si il manque
         # On filtre sur la colonne 8 (Annotation)
         
         # Pour les Promoteurs
@@ -495,7 +481,7 @@ rule Compute_matrix_annotated:
         matrix=f"{Workdir}/deeptools/matrix_annotated.gz"
     log:
         f"{Workdir}/logs/deeptools/matrix_annotated.log"
-    threads: 4
+    threads: 8
     shell:
         """
         eval "$(micromamba shell hook --shell=bash)"
@@ -507,6 +493,7 @@ rule Compute_matrix_annotated:
             --referencePoint center \
             --beforeRegionStartLength 3000 \
             --afterRegionStartLength 3000 \
+			--missingDataAsZero \
             --skipZeros \
             -p {threads} \
             -o {output.matrix} > {log} 2>&1
@@ -522,7 +509,7 @@ rule Plot_heatmap_annotated:
     output:
         heatmap=f"{Workdir}/deeptools/heatmap_annotated.png"
     log:
-        f"{Workdir}/logs/deeptool/heatmap_annotated.log"
+        f"{Workdir}/logs/deeptools/heatmap_annotated.log"
     shell:
         """
         eval "$(micromamba shell hook --shell=bash)"
@@ -534,6 +521,7 @@ rule Plot_heatmap_annotated:
             --regionsLabel "Promoteurs" "Autres" \
             --plotTitle "Signal CutNTag par type d'annotation"
         """
+
 
 
 
