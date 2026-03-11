@@ -423,7 +423,7 @@ rule Homer_annotate_peaks:
         f"{Workdir}/logs/homer/annotate_peaks.log"
     params:
         genome="hg38",
-        homer_home="/home/iguerin2024@ec-nantes.fr/scratch/homer"
+        homer_home="/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/tools/homer"
     shell:
         """
         export HOMER_HOME={params.homer_home}
@@ -517,6 +517,7 @@ rule Plot_heatmap_annotated:
             --regionsLabel "Promoteurs" "Autres" \
             --plotTitle "Signal CutNTag par type d'annotation"
         """
+
 
 
 
