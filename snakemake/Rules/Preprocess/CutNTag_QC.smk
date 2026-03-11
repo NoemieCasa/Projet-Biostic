@@ -414,9 +414,6 @@ rule MultiQC:
 # ============================================================
 # Annotation des peaks avec Homer
 # ============================================================
-# ============================================================
-# Annotation des peaks avec Homer (Version Anti-Arobase)
-# ============================================================
 rule Homer_annotate_peaks:
     input:
         narrowpeak=f"{Workdir}/macs2/all_samples_peaks.narrowPeak"
@@ -487,7 +484,6 @@ rule Split_annotations_to_bed:
         # VERIFICATION : Si les fichiers sont vides, on affiche un message d'erreur clair
         if [ ! -s {output.tss} ]; then echo "ERREUR: Aucun promoteur trouvé dans l'annotation" >&2; fi
         """
-        """
 # ============================================================
 # Matrix groupée par annotation
 # ============================================================
@@ -538,6 +534,7 @@ rule Plot_heatmap_annotated:
             --regionsLabel "Promoteurs" "Autres" \
             --plotTitle "Signal CutNTag par type d'annotation"
         """
+
 
 
 
