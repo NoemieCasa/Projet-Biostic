@@ -2,6 +2,7 @@
     "snakedir": "/home/iguerin2024@ec-nantes.fr/Projet-Biostic/snakemake",
     "projPath": "/home/iguerin2024@ec-nantes.fr/Projet-Biostic",
     "workdir": "/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/results",
+    "workdir_bis": "/home/iguerin2024\@ec-nantes.fr/scratch/cutNtag/results",
     "DataPath": "/LAB-DATA/GLiCID/projects/CR2TI_lab/TEAM3/Projects/Proenc_CutNTag/CutTag",
     "fastafiledir": "/LAB-DATA/GLiCID/projects/CR2TI_lab/TEAM3/Databases/FASTA/Hg38",
     "fastafiles": {
