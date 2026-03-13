@@ -426,9 +426,10 @@ rule Annotate_peaks_homer:
     shell:
         """
 		micromamba activate homer_env
+		ln -sf '{input.peaks}' peaks
         annotatePeaks.pl \
-            '{input.peaks}' {params.genome} \
-            > '{output.annotation}' \
+            peaks {params.genome} \
+            > {output.annotation} \
             2> {log}
         """
 
@@ -522,6 +523,7 @@ rule Plot_heatmap_annotated:
             --regionsLabel "Promoters" "Other regions" \
             --plotTitle "Cut&Tag signal by annotation"
         """
+
 
 
 
