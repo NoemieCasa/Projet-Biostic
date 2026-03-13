@@ -414,7 +414,7 @@ rule MultiQC:
 # ============================================================
 # Annotation des peaks MACS2 avec Homer
 # ============================================================
-rule annotate_peaks_homer:
+rule Annotate_peaks_homer:
     input:
         peaks=f"{Workdir}/macs2/all_samples_peaks.narrowPeak"
     output:
@@ -441,7 +441,7 @@ rule annotate_peaks_homer:
 #   - Distal / intergenic
 # Harmonise les noms de chromosomes (ajoute 'chr' si absent)
 # ============================================================
-rule split_annotations_to_bed:
+rule Split_annotations_to_bed:
     input:
         annotation=f"{Workdir}/homer/peaks_annotation.txt"
     output:
@@ -472,7 +472,7 @@ rule split_annotations_to_bed:
 # Matrix groupée par annotation
 # ============================================================
 
-rule compute_matrix_annotated:
+rule Compute_matrix_annotated:
     input:
         bw=expand(f"{Workdir}/bigwig/{{sample}}.bw", sample=SAMPLES),
         regions=[
@@ -505,7 +505,7 @@ rule compute_matrix_annotated:
 # Heatmap annotée
 # ============================================================
 
-rule plot_heatmap_annotated:
+rule Plot_heatmap_annotated:
     input:
         matrix=f"{Workdir}/deeptools/matrix_annotated.gz"
     output:
@@ -524,6 +524,7 @@ rule plot_heatmap_annotated:
             --regionsLabel "Promoters" "Other regions" \
             --plotTitle "Cut&Tag signal by annotation"
         """
+
 
 
 
