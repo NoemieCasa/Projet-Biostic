@@ -19,7 +19,6 @@ shell.prefix(
 configfile: "config.json"
 Snakedir = config["snakedir"]
 Workdir = config["workdir"]
-Workdir_bis = config["workdir_bis"]
 DataPath = config["DataPath"]
 configfile: "config.json"
 
