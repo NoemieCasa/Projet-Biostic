@@ -412,69 +412,73 @@ rule MultiQC:
         """
 
 # ============================================================
-# Annotation des peaks avec Homer
+# Annotation des peaks MACS2 avec Homer
 # ============================================================
-rule Homer_annotate_peaks:
+rule annotate_peaks_homer:
     input:
-        narrowpeak=f"{Workdir}/macs2/all_samples_peaks.narrowPeak"
+        peaks=f"{Workdir}/macs2/all_samples_peaks.narrowPeak"
     output:
         annotation=f"{Workdir}/homer/peaks_annotation.txt"
     log:
         f"{Workdir}/logs/homer/annotate_peaks.log"
     params:
         genome="hg38",
-        homer_home="/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/tools/homer"
+        homer="/home/iguerin2024@ec-nantes.fr/scratch/cutNtag/tools/homer"
     shell:
         """
-        export HOMER_HOME={params.homer_home}
+        export HOMER_HOME={params.homer}
 
-        {params.homer_home}/bin/annotatePeaks.pl \
-            {input.narrowpeak} \
-            {params.genome} \
+        {params.homer}/bin/annotatePeaks.pl \
+            {input.peaks} {params.genome} \
             > {output.annotation} \
             2> {log}
         """
 
 
-
 # ============================================================
-# Extraction avec harmonisation des noms de chromosomes
+# Sépare les annotations Homer en deux BED :
+#   - Promoteurs
+#   - Distal / intergenic
+# Harmonise les noms de chromosomes (ajoute 'chr' si absent)
 # ============================================================
-rule Split_annotations_to_bed:
+rule split_annotations_to_bed:
     input:
         annotation=f"{Workdir}/homer/peaks_annotation.txt"
     output:
-        tss=f"{Workdir}/homer/split_bed/promoters.bed",
+        promoters=f"{Workdir}/homer/split_bed/promoters.bed",
         distal=f"{Workdir}/homer/split_bed/distal_intergenic.bed"
     shell:
         """
-		mkdir -p $(dirname {output.tss})
-    	# On extrait les colonnes 2,3,4 et on ajoute 'chr' si il manque
-        
-        # Pour les Promoteurs
-        awk -F'\\t' 'BEGIN{{OFS="\\t"}} NR>1 && $8 ~ /[Pp]romoter/ {{ 
-            chrom=$2; 
-            if(chrom !~ /^chr/) chrom="chr"chrom; 
-            print chrom, $3, $4 
-        }}' {input.annotation} > {output.tss}
+        mkdir -p $(dirname {output.promoters})
 
-        # Pour le reste (Distal)
-        awk -F'\\t' 'BEGIN{{OFS="\\t"}} NR>1 && $8 !~ /[Pp]romoter/ {{ 
-            chrom=$2; 
-            if(chrom !~ /^chr/) chrom="chr"chrom; 
-            print chrom, $3, $4 
+        # Promoteurs
+        awk -F'\\t' 'BEGIN{{OFS="\\t"}} NR>1 && $8~/[Pp]romoter/ {{
+            c=$2; if(c!~/^chr/) c="chr"c; print c,$3,$4
+        }}' {input.annotation} > {output.promoters}
+
+        # Autres régions
+        awk -F'\\t' 'BEGIN{{OFS="\\t"}} NR>1 && $8!~/[Pp]romoter/ {{
+            c=$2; if(c!~/^chr/) c="chr"c; print c,$3,$4
         }}' {input.annotation} > {output.distal}
 
-        # VERIFICATION : Si les fichiers sont vides, on affiche un message d'erreur clair
-        if [ ! -s {output.tss} ]; then echo "ERREUR: Aucun promoteur trouvé dans l'annotation" >&2; fi
+        # Vérification simple
+        if [ ! -s {output.promoters} ]; then
+            echo "ERREUR: aucun promoteur détecté." >&2
+        fi
         """
+
+
 # ============================================================
 # Matrix groupée par annotation
 # ============================================================
-rule Compute_matrix_annotated:
+
+rule compute_matrix_annotated:
     input:
         bw=expand(f"{Workdir}/bigwig/{{sample}}.bw", sample=SAMPLES),
-        regions=[f"{Workdir}/homer/split_bed/promoters.bed", f"{Workdir}/homer/split_bed/distal_intergenic.bed"]
+        regions=[
+            f"{Workdir}/homer/split_bed/promoters.bed",
+            f"{Workdir}/homer/split_bed/distal_intergenic.bed"
+        ]
     output:
         matrix=f"{Workdir}/deeptools/matrix_annotated.gz"
     log:
@@ -489,19 +493,19 @@ rule Compute_matrix_annotated:
             --scoreFileName {input.bw} \
             --regionsFileName {input.regions} \
             --referencePoint center \
-            --beforeRegionStartLength 3000 \
-            --afterRegionStartLength 3000 \
-			--missingDataAsZero \
+            -b 3000 -a 3000 \
+            --missingDataAsZero \
             --skipZeros \
             -p {threads} \
-            -o {output.matrix} > {log} 2>&1
+            -o {output.matrix} \
+            > {log} 2>&1
         """
 
 # ============================================================
 # Heatmap annotée
 # ============================================================
 
-rule Plot_heatmap_annotated:
+rule plot_heatmap_annotated:
     input:
         matrix=f"{Workdir}/deeptools/matrix_annotated.gz"
     output:
@@ -512,13 +516,15 @@ rule Plot_heatmap_annotated:
         """
         eval "$(micromamba shell hook --shell=bash)"
         micromamba activate DeepTools
+
         plotHeatmap \
             -m {input.matrix} \
             -out {output.heatmap} \
             --colorMap Viridis \
-            --regionsLabel "Promoteurs" "Autres" \
-            --plotTitle "Signal CutNTag par type d'annotation"
+            --regionsLabel "Promoters" "Other regions" \
+            --plotTitle "Cut&Tag signal by annotation"
         """
+
 
 
 
