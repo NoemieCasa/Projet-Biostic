@@ -434,6 +434,9 @@ rule Homer_annotate_peaks:
             > {output.annotation} \
             2> {log}
         """
+
+
+
 # ============================================================
 # Extraction avec harmonisation des noms de chromosomes
 # ============================================================
@@ -447,7 +450,6 @@ rule Split_annotations_to_bed:
         """
 		mkdir -p $(dirname {output.tss})
     	# On extrait les colonnes 2,3,4 et on ajoute 'chr' si il manque
-        # On filtre sur la colonne 8 (Annotation)
         
         # Pour les Promoteurs
         awk -F'\\t' 'BEGIN{{OFS="\\t"}} NR>1 && $8 ~ /[Pp]romoter/ {{ 
@@ -517,6 +519,7 @@ rule Plot_heatmap_annotated:
             --regionsLabel "Promoteurs" "Autres" \
             --plotTitle "Signal CutNTag par type d'annotation"
         """
+
 
 
 
