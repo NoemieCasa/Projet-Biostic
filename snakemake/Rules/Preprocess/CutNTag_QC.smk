@@ -521,10 +521,11 @@ rule Plot_heatmap_annotated:
         plotHeatmap \
             -m {input.matrix} \
             -out {output.heatmap} \
-            --colorMap Viridis \
+            --colorMap viridis \
             --regionsLabel "Promoters" "Other regions" \
             --plotTitle "Cut&Tag signal by annotation"
         """
+
 
 
 
