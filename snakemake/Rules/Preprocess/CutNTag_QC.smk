@@ -430,9 +430,9 @@ rule Annotate_peaks_homer:
         """
         export HOMER_HOME={params.homer}
 
-        {params.homer}/bin/annotatePeaks.pl \
-            {input.peaks} {params.genome} \
-            > {output.annotation} \
+        '{params.homer}'/bin/annotatePeaks.pl \
+            '{input.peaks}' {params.genome} \
+            > '{output.annotation}' \
             2> {log}
         """
 
@@ -526,6 +526,7 @@ rule Plot_heatmap_annotated:
             --regionsLabel "Promoters" "Other regions" \
             --plotTitle "Cut&Tag signal by annotation"
         """
+
 
 
 
