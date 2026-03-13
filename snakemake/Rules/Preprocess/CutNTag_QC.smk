@@ -422,17 +422,13 @@ rule Annotate_peaks_homer:
     log:
         f"{Workdir}/logs/homer/annotate_peaks.log"
     params:
-        genome="hg38",
-        homer="/home/iguerin2024\@ec-nantes.fr/scratch/cutNtag/tools/homer"
-        peaks="/home/iguerin2024\@ec-nantes.fr/scratch/cutNtag/results/macs2/all_samples_peaks.narrowPeak"
-        annotation="/home/iguerin2024\@ec-nantes.fr/scratch/cutNtag/results/homer/peaks_annotation.txt"
+        genome="hg38"
     shell:
         """
-        export HOMER_HOME={params.homer}
-
-        '{params.homer}'/bin/annotatePeaks.pl \
-            '{input.peaks}' {params.genome} \
-            > '{output.annotation}' \
+		micromamba activate homer_env
+        annotatePeaks.pl \
+            {input.peaks} {params.genome} \
+            > {output.annotation} \
             2> {log}
         """
 
@@ -526,6 +522,7 @@ rule Plot_heatmap_annotated:
             --regionsLabel "Promoters" "Other regions" \
             --plotTitle "Cut&Tag signal by annotation"
         """
+
 
 
 
