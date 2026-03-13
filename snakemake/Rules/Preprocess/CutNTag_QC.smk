@@ -516,7 +516,6 @@ rule Plot_heatmap_annotated:
         f"{Workdir}/logs/deeptools/heatmap_annotated.log"
     shell:
         """
-        eval "$(micromamba shell hook --shell=bash)"
         micromamba activate DeepTools
 
         plotHeatmap \
