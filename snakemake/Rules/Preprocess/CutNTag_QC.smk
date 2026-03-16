@@ -538,8 +538,34 @@ rule Extract_gene_list:
         awk -F'\\t' 'NR>1 {{print $12"\\t"$8}}' {input.annotation} | sort | uniq > {output.genes}
         """
 
+# ============================================================
+# Find Motif Genome
+# ============================================================
 
+rule FindMotifsGenome_homer:
+    input:
+        peaks=f"{Workdir}/macs2/all_samples_peaks.narrowPeak"
+    output:
+        directory(f"{Workdir}/homer/motifs")
+    log:
+        f"{Workdir}/logs/homer/find_motifs.log"
+    params:
+        genome="hg38",
+        size=200
+    shell:
+        """
+        eval "$(micromamba shell hook --shell=bash)"
+        micromamba activate homer_env
 
+        mkdir -p {output}
+
+        findMotifsGenome.pl \
+            {input.peaks} \
+            {params.genome} \
+            {output} \
+            -size {params.size} \
+            > {log} 2>&1
+        """
 
 
 
