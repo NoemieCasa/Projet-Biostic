@@ -437,12 +437,9 @@ rule Annotate_peaks_homer:
         """
 
 
-# ============================================================
-# Sépare les annotations Homer en deux BED :
-#   - Promoteurs
-#   - Distal / intergenic
-# Harmonise les noms de chromosomes (ajoute 'chr' si absent)
-# ============================================================
+# ====================================================================================================================
+# Séparation des annotations Homer en Promoteurs et Distal / intergenic et harmonisation des noms de chromosomes
+# ====================================================================================================================
 rule Split_annotations_to_bed:
     input:
         annotation=f"{Workdir}/homer/peaks_annotation.txt"
@@ -525,6 +522,7 @@ rule Plot_heatmap_annotated:
             --regionsLabel "Promoters" "Other regions" \
             --plotTitle "Cut&Tag signal by annotation"
         """
+
 
 
 
