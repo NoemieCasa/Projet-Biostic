@@ -107,6 +107,9 @@ rule all:
         # extraire la liste des gènes 
         f"{Workdir}/homer/target_genes_list.tsv"
 
+        # Find Motif Genome
+        f"{Workdir}/homer/motifs"
+
 ##################
 ###import rules###
 ##################
