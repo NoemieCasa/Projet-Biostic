@@ -523,10 +523,20 @@ rule Plot_heatmap_annotated:
             --plotTitle "Cut&Tag signal by annotation"
         """
 
-
-
-
-
+# ============================================================
+# Heatmap annotée
+# ============================================================
+rule Extract_gene_list:
+    input:
+        annotation=f"{Workdir}/homer/peaks_annotation.txt"
+    output:
+        genes=f"{Workdir}/homer/final_gene_list.txt"
+    shell:
+        """
+        # On extrait la colonne 12 (Nom du gène) et la colonne 8 (Annotation)
+        # On trie et on enlève les doublons
+        awk -F'\\t' 'NR>1 {{print $12"\\t"$8}}' {input.annotation} | sort | uniq > {output.genes}
+        """
 
 
 
