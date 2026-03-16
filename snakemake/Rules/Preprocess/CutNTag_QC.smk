@@ -524,7 +524,7 @@ rule Plot_heatmap_annotated:
         """
 
 # ============================================================
-# Heatmap annotée
+# extraire la liste des gènes
 # ============================================================
 rule Extract_gene_list:
     input:
