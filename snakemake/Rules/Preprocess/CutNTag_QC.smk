@@ -556,11 +556,12 @@ rule FindMotifsGenome_homer:
         """
         eval "$(micromamba shell hook --shell=bash)"
         micromamba activate homer_env
+		ln -sf {input.peaks} peaks
 
         mkdir -p {output}
 
         findMotifsGenome.pl \
-            {input.peaks} \
+            peaks \
             {params.genome} \
             {output} \
             -size {params.size} \
