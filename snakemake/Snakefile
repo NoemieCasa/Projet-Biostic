@@ -105,7 +105,7 @@ rule all:
         f"{Workdir}/homer/split_bed/promoters.bed",
 
         # extraire la liste des gènes 
-        f"{Workdir}/homer/target_genes_list.tsv",
+        f"{Workdir}/homer/final_gene_list.txt",
 
         # Find Motif Genome
         f"{Workdir}/homer/motifs"
