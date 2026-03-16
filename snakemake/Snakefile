@@ -102,7 +102,10 @@ rule all:
 
         # HOMER ET HEATMAP ANNOTÉE
         f"{Workdir}/deeptools/heatmap_annotated.png",  # Sortie de la heatmap groupée
-        f"{Workdir}/homer/split_bed/promoters.bed"      # Un des fichiers split
+        f"{Workdir}/homer/split_bed/promoters.bed",
+
+        # extraire la liste des gènes 
+        f"{Workdir}/homer/target_genes_list.tsv"
 
 ##################
 ###import rules###
