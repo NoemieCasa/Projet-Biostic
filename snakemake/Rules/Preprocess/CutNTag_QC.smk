@@ -363,6 +363,10 @@ rule PlotProfile:
             --samplesLabel {params.labels} \
             -T "Average signal around peaks" \
             --perGroup \
+            --plotHeight 6 \
+            --plotWidth 10 \
+            --legendLocation upper-right \
+            --legendFontSize 12 \
             2> {log}
         """
 # ============================================================
