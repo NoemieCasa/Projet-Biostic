@@ -366,7 +366,6 @@ rule PlotProfile:
             --plotHeight 6 \
             --plotWidth 10 \
             --legendLocation upper-right \
-            --legendFontSize 12 \
             2> {log}
         """
 # ============================================================
