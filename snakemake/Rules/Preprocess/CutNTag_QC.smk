@@ -346,11 +346,9 @@ rule PlotProfile:
     log:
         f"{Workdir}/logs/deeptools/plotProfile.log"
     threads: 2
-    resources:
-        mem_mb=8000,
-        runtime="2h"
     params:
-        labels=" ".join(SAMPLES)
+        labels=" ".join(SAMPLES),
+        type="lines"
     shell:
         """
         eval "$(micromamba shell hook --shell=bash)"
@@ -363,8 +361,12 @@ rule PlotProfile:
             --samplesLabel {params.labels} \
             -T "Average signal around peaks" \
             --perGroup \
-            --plotHeight 6 \
+            --plotHeight 7 \
             --plotWidth 10 \
+            --yMin 0 \
+            --yMax 0.5 \
+            --plotType {params.type} \
+            --colors "red" "blue" "green" \
             --legendLocation upper-right \
             2> {log}
         """
