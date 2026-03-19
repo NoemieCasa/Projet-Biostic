@@ -367,7 +367,6 @@ rule PlotProfile:
             --yMax 0.5 \
             --plotType {params.type} \
             --colors "red" "blue" "green" \
-            --legendLocation upper-right \
             2> {log}
         """
 # ============================================================
